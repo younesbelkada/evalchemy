@@ -35,7 +35,9 @@ def setup_custom_parser():
 
     db_group.add_argument("--model_id", type=str, default=None, help="Model UUID for direct database tracking")
 
-    parser.add_argument("--use_database", action="store_true", help="Where to use PostgreSQL Database to track results.")
+    parser.add_argument(
+        "--use_database", action="store_true", help="Where to use PostgreSQL Database to track results."
+    )
     parser.add_argument(
         "--model_name",
         type=str,
@@ -232,12 +234,12 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
         args.hf_hub_log_args += f",output_path={args.output_path}"
     evaluation_tracker = setup_evaluation_tracker(args.output_path, args.use_database)
 
-    # If model_id is provided, lookup model name from database
+    # If model_id is provided, lookup model weights location from database
     if args.model_id:
         if not args.use_database:
             raise ValueError("--use_database must be set to use --model_id.")
         try:
-            model_name = evaluation_tracker.get_model_name_from_db(args.model_id)
+            model_name = evaluation_tracker.get_model_attribute_from_db(args.model_id, "weights_location")
             args.model_args = update_model_args_with_name(args.model_args or "", model_name)
             utils.eval_logger.info(f"Retrieved model name from database: {model_name}")
         except Exception as e:

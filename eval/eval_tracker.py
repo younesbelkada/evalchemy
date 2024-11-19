@@ -370,27 +370,30 @@ class DCEvaluationTracker:
                 session=session,
             )
 
-    def get_model_name_from_db(
-        self,
-        model_id: str,
-    ) -> str:
+    def get_model_attribute_from_db(self, model_id: str, attribute: str) -> str:
         """
-        Retrieve model name from database using model_id.
+        Retrieve a specific attribute from a model in the database.
 
         Args:
             model_id: UUID string of the model
+            attribute: Name of the attribute to retrieve (e.g., 'name', 'weights_location')
 
         Returns:
-            str: Model name from database
+            str: Value of the requested attribute
 
         Raises:
-            RuntimeError: If model_id is not found in database or if database operation fails
+            RuntimeError: If model_id is not found in database or if attribute doesn't exist
+            ValueError: If model_id is not a valid UUID
         """
         with self.session_scope() as session:
             try:
                 model = session.get(Model, uuid.UUID(model_id))
                 if model is None:
                     raise RuntimeError(f"Model with id {model_id} not found in database")
-                return model.name
+                if not hasattr(model, attribute):
+                    raise RuntimeError(f"Attribute '{attribute}' does not exist on Model")
+                return getattr(model, attribute)
+            except ValueError as e:
+                raise ValueError(f"Invalid UUID format: {str(e)}")
             except Exception as e:
-                raise RuntimeError(f"Database error in get_model_name_from_db: {str(e)}")
+                raise RuntimeError(f"Database error in get_model_attribute_from_db: {str(e)}")

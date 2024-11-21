@@ -143,8 +143,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/evalchemy"
-Repository = "https://github.com/yourusername/evalchemy.git"
+Homepage = "https://github.com/mlfoundations/evalchemy"
+Repository = "https://github.com/mlfoundations/evalchemy.git"
 
 [project.optional-dependencies]
 dev = [

@@ -180,9 +180,3 @@ packages = ["evalchemy"]
 
 [tool.setuptools.package-dir]
 evalchemy = "evalchemy"
-
-[tool.setuptools.package-data]
-evalchemy = [
-    "external_repositories/code2flow/**/*",
-    "external_repositories/airoboros/**/*",
-]

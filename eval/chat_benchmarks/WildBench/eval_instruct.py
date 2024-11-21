@@ -8,6 +8,7 @@ import logging
 import jsonlines
 from datasets import load_dataset
 from openai import OpenAI
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
@@ -49,6 +50,7 @@ class WildBenchConfig:
     model: str = "gpt-4o-mini-2024-07-18"
     mode: str = "score"
     batch_mode: bool = True
+    api_parallel: int = 32
 
     # Task weights
     task_weights: Dict[str, float] = None
@@ -336,15 +338,24 @@ class WildBenchBenchmark(BaseBenchmark):
             with open(eval_file, "r") as file:
                 lines = file.readlines()
 
-            results = []
-            for line in lines:
+            def process_line(line):
                 payload = json.loads(line)
                 payload["body"]["max_tokens"] = 4096
                 response = client.chat.completions.create(**payload["body"])
-
                 result = payload.copy()
                 result["response"] = json.loads(response.json())
-                results.append(result)
+                return result
+
+            results = []
+            # Use ThreadPoolExecutor since API calls are I/O bound
+            with ThreadPoolExecutor(max_workers=self.config.api_parallel) as executor:
+                future_to_line = {executor.submit(process_line, line): line for line in lines}
+                for future in as_completed(future_to_line):
+                    try:
+                        result = future.result()
+                        results.append(result)
+                    except Exception as e:
+                        self.logger.error(f"Error processing line: {str(e)}")
 
             output_file = eval_file.replace("batch-submit.jsonl", "results.jsonl")
             with open(output_file, "w") as file:

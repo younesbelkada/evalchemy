@@ -355,8 +355,9 @@ class DCEvaluationTracker:
             eval_logger.info(f"Updating results for model_id: {str(model_id)}")
 
             results = eval_log_dict["results"]
-            benchmark_name = next(iter(results))
-            updated_results = self.update_results_with_benchmark(flatten_dict(results[benchmark_name]), benchmark_name)
+            updated_results = {}
+            for benchmark_name in results:
+                updated_results.update(self.update_results_with_benchmark(flatten_dict(results[benchmark_name]), benchmark_name))
 
             self.insert_eval_results(
                 model_id=model_id,

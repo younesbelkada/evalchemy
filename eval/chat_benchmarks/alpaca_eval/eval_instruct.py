@@ -21,7 +21,6 @@ class AlpacaBenchmark(BaseBenchmark):
         "gpt-4o-mini-2024-07-18": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
         "gpt-4-1106-preview": "weighted_alpaca_eval_gpt4_turbo",
         "gpt-4": "alpaca_eval_gpt4_0613",
-        "gpt-4-1106-preview-greedy": "weighted_alpaca_eval_gpt4_turbo_greedy",
         "auto": DEFAULT_ANNOTATOR_CONFIG,
     }
 
@@ -31,7 +30,7 @@ class AlpacaBenchmark(BaseBenchmark):
         subset: str = "alpaca_eval",
         split: str = "eval",
         max_tokens: int = 1024,
-        temperature: float = 0,
+        temperature: float = 0.5,
         do_sample: bool = True,
         debug: bool = False,
         annotator_model: str = "gpt-4o-mini-2024-07-18",

@@ -90,6 +90,18 @@ python -m eval.eval \
     --output_path logs
 ```
 
+**Config shortcuts**: 
+
+To be able to reuse commonly used settings without having to manually supply full arguments every time, we support reading eval configs from YAML files. These configs replace the `--batch_size`, `--tasks`, and `--annoator_model` arguments. Some example config files can be found in `./configs`. To use these configs, you can use the `--config` flag as shown below:
+
+```bash
+python -m eval.eval \
+    --model hf \
+    --model_args "pretrained=mistralai/Mistral-7B-Instruct-v0.3" \
+    --output_path logs \
+    --config configs/light_gpt4omini0718.yaml
+```
+
 We add several more command examples in [`eval/examples`](https://github.com/mlfoundations/Evalchemy/tree/main/eval/examples) to help you start using Evalchemy. 
 
 ## 🔧 Advanced Usage
@@ -103,6 +115,7 @@ To choose a model, simply set 'pretrained=<name of hf model>' where the model na
 #### Coming Soon
 - Support for [vLLM models](https://vllm.ai/)
 - Support for [OpenAI](https://openai.com/)
+- Few-shot prompting for instruction benchmarks.
 
 ### Multi-GPU Evaluation
 

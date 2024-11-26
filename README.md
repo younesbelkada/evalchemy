@@ -103,6 +103,7 @@ To choose a model, simply set 'pretrained=<name of hf model>' where the model na
 #### Coming Soon
 - Support for [vLLM models](https://vllm.ai/)
 - Support for [OpenAI](https://openai.com/)
+- Few-shot prompting for instruction benchmarks.
 
 ### Multi-GPU Evaluation
 

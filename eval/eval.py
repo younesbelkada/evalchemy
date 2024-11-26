@@ -291,14 +291,6 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
         task_list=task_list,
         verbosity=args.verbosity,
         args=args,
-        num_fewshot=args.num_fewshot,
-        batch_size=args.batch_size,
-        max_batch_size=args.max_batch_size,
-        device=args.device,
-        use_cache=args.use_cache,
-        limit=args.limit,
-        annotator_model=args.annotator_model,
-        evaluation_tracker=evaluation_tracker,
     )
 
     # Add metadata to results

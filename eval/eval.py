@@ -28,6 +28,7 @@ from eval.eval_tracker import DCEvaluationTracker
 
 from eval.constants import LIST_OPENAI_MODELS
 
+
 def setup_custom_parser():
     """
     Create a custom argument parser that extends lm-eval-harness parser.
@@ -80,9 +81,7 @@ def setup_custom_parser():
     )
 
     parser.add_argument(
-        "--config",
-        type=str,
-        help="Path to config yaml. Overwrites --batch_size, --tasks, and --annotator_model"
+        "--config", type=str, help="Path to config yaml. Overwrites --batch_size, --tasks, and --annotator_model"
     )
     parser.add_argument(
         "--debug",
@@ -133,9 +132,9 @@ def evaluate(
 
     # Split tasks between benchmark and pretrain
     benchmark_tasks = [t for t in task_list if t in task_manager.tasks]
-    benchmark_batch_sizes = [b for (t,b) in zip(task_list, batch_sizes_list) if t in task_manager.tasks]
+    benchmark_batch_sizes = [b for (t, b) in zip(task_list, batch_sizes_list) if t in task_manager.tasks]
     pretrain_tasks = [t for t in task_list if t in pretrain_task_manager.all_tasks]
-    pretrain_batch_sizes = [b for (t,b) in zip(task_list, batch_sizes_list) if t in pretrain_task_manager.all_tasks]
+    pretrain_batch_sizes = [b for (t, b) in zip(task_list, batch_sizes_list) if t in pretrain_task_manager.all_tasks]
 
     unknown_tasks = set(task_list).difference(set(benchmark_tasks)).difference(set(pretrain_tasks))
 
@@ -148,7 +147,6 @@ def evaluate(
         eval_logger.info(f"Pretrain tasks to evaluate: {pretrain_tasks}")
 
     results = {"results": {}}
-
 
     # Run benchmark evaluations - sequential generation, parallel evaluation
     if benchmark_tasks:
@@ -253,9 +251,9 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
         # This overwrites `--tasks` and `--batch_size`
         with open(args.config, "r") as file:
             tasks_yaml = yaml.safe_load(file)
-        args.tasks = ','.join([t['task_name'] for t in tasks_yaml['tasks']])
-        batch_sizes_list = [t['batch_size'] for t in tasks_yaml['tasks']]
-        args.annotator_model = tasks_yaml.get('annotator_model', args.annotator_model)
+        args.tasks = ",".join([t["task_name"] for t in tasks_yaml["tasks"]])
+        batch_sizes_list = [t["batch_size"] for t in tasks_yaml["tasks"]]
+        args.annotator_model = tasks_yaml.get("annotator_model", args.annotator_model)
     else:
         batch_sizes_list = [args.batch_size for _ in range(len(args.tasks.split(",")))]
 
@@ -263,7 +261,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
     if args.output_path:
         args.hf_hub_log_args += f",output_path={args.output_path}"
     evaluation_tracker = setup_evaluation_tracker(args.output_path, args.use_database)
-    
+
     task_list = args.tasks.split(",")
 
     # If model_id is provided, lookup model weights location from database
@@ -278,7 +276,9 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
             utils.eval_logger.error(f"Failed to retrieve model name from database: {str(e)}")
             sys.exit(1)
         if not args.overwrite_database:
-            task_list = [task for task in task_list if not evaluation_tracker.check_if_already_done(task, args.model_id)]
+            task_list = [
+                task for task in task_list if not evaluation_tracker.check_if_already_done(task, args.model_id)
+            ]
             if len(task_list) == 0:
                 utils.eval_logger.info("All tasks passed in were found in the database.")
                 exit()
@@ -290,7 +290,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
     if args.annotator_model in LIST_OPENAI_MODELS:
         if not os.getenv("OPENAI_API_KEY"):
             raise ValueError("Please set OPENAI_API_KEY")
-    
+
     task_manager = InstructTaskManager(annotator_model=args.annotator_model, debug=args.debug)
     pretrain_task_manager = PretrainTaskManager(args.verbosity, include_path=args.include_path)
 

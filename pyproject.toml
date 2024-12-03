@@ -121,7 +121,6 @@ dependencies = [
     "docker-pycreds",
     "sentry-sdk",
     "loguru>=0.7",
-    "liger-kernel",
     "python-dotenv",
     "shortuuid",
     "tenacity",

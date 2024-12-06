@@ -8,3 +8,15 @@ tasks:
     batch_size: 32
   - task_name: MTBench
     batch_size: 32
+  - task_name: IFEval
+    batch_size: 32
+  - task_name: mmlu
+    batch_size: 32
+  - task_name: ai2_arc
+    batch_size: 32
+  - task_name: HumanEval
+    batch_size: 32
+  - task_name: MBPP
+    batch_size: 32
+  - task_name: drop
+    batch_size: 32

@@ -24,3 +24,5 @@ tasks:
     batch_size: 32
   - task_name: drop
     batch_size: 32
+  - task_name: hendrycks_math
+    batch_size: 32

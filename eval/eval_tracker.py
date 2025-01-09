@@ -188,6 +188,7 @@ class DCEvaluationTracker:
         Args:
             model_name: Name of the model
             model_id: Optional UUID of existing model
+            model_source: Source of the model (as model arg in lm_eval or eval.py)
 
         Returns:
             Tuple of (model_id, dataset_id)
@@ -347,7 +348,7 @@ class DCEvaluationTracker:
         Args:
             eval_log_dict: Dictionary containing evaluation logs and results
             model_id: Optional UUID of the model
-            model_source: Source of the model (similar to the model arg in eval.py)
+            model_source: Source of the model (similar to the model arg in lm_eval or eval.py)
             model_name: Optional name of the model
             creation_location: Location where evaluation was run
             created_by: Username who ran the evaluation

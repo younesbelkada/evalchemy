@@ -276,6 +276,7 @@ def get_or_add_model_by_name(model: str, model_source: str = "hf"):
 
     Args:
         model (str): The path or identifier for the Hugging Face or other model.
+        model_source (str): Source of the model (as model arg in lm_eval or eval.py)
     """
     if model_source == "hf":
         git_commit_hash = HfApi().model_info(model).sha
@@ -384,7 +385,7 @@ def register_model_to_db(model_name: str, model_source: str) -> UUID:
 
     Args:
         model_name (str): The name or identifier for the model
-        model_source (str): Source of the model (e.g., 'openai-chat-completions', 'anthropic')
+        model_source (str): Source of the model (e.g., 'openai-chat-completions' or other model arg in lm_eval)
 
     Returns:
         UUID: The unique identifier assigned to the registered model

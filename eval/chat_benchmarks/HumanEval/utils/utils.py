@@ -47,6 +47,22 @@ def get_function_name(question: str, lang: str):
     return func_name, func_prefix
 
 
+def get_code_block(input: str, lang: str):
+    input = input.split("\n")
+    beg = 0
+    while not input[0].strip().startswith("```") and beg < len(input) - 2:
+        beg += 1
+    # Remove the code block quotes
+    beg += 1
+    end = len(input)
+    while not input[-1].strip().endswith("```") and end > 1:
+        end -= 1
+    # Remove the code block quotes
+    end -= 1
+    input = input[beg:end]
+    return "\n".join(input)
+
+
 def extract_generation_code(example: str, lang_code: str, verbose: bool = False):
     task_id = example["task_id"]
     output = example.get("output", example.get("gpt_completion"))
@@ -54,6 +70,10 @@ def extract_generation_code(example: str, lang_code: str, verbose: bool = False)
     setting = language_settings[lang_code]
     lang = setting["full_name"]
     indent = setting["indent"]
+
+    # If the model did not repeat the question, add it to the output
+    if question not in output:
+        output = "```" + lang + "\n" + question + "\n" + get_code_block(output, lang_code) + "\n```"
 
     try:
         code_block: str = re.findall(f"```{lang.lower()}\n(.*?)```", output, re.DOTALL | re.IGNORECASE)[0]

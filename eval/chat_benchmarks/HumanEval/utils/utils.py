@@ -71,11 +71,13 @@ def extract_generation_code(example: str, lang_code: str, verbose: bool = False)
     lang = setting["full_name"]
     indent = setting["indent"]
 
-    # If the model did not repeat the question, add it to the output
-    if question not in output:
-        output = "```" + lang + "\n" + question + "\n" + get_code_block(output, lang_code) + "\n```"
-
     try:
+        func_name, func_prefix = get_function_name(question, lang)
+
+        # If the model did not repeat the question, add it to the output
+        if func_name not in output:
+            output = "```" + lang + "\n" + question + "\n" + get_code_block(output, lang_code) + "\n```"
+
         code_block: str = re.findall(f"```{lang.lower()}\n(.*?)```", output, re.DOTALL | re.IGNORECASE)[0]
         if verbose:
             print(">>> Task: {}\n{}".format(task_id, code_block))
@@ -84,8 +86,6 @@ def extract_generation_code(example: str, lang_code: str, verbose: bool = False)
         if setting.get("main", None) and setting["main"] in code_block:
             main_start = code_block.index(setting["main"])
             code_block = code_block[:main_start]
-
-        func_name, func_prefix = get_function_name(question, lang)
 
         try:
             start = code_block.lower().index(func_name.lower())

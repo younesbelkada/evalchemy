@@ -210,4 +210,3 @@ result_dirs/gsm/gemma-2-27b-it@vllm.json
 result_dirs/zebra-grid/gemma-2-27b-it@vllm.json
 result_dirs_parsed/
 state_of_limit/task_summary_*.json
-eval/chat_benchmarks/LiveBench/data

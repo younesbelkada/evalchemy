@@ -9,6 +9,7 @@ from lm_eval.models.api_models import JsonChatStr
 from lm_eval.api.registry import register_model
 from lm_eval.api.instance import Instance
 from lm_eval.models.utils import handle_stop_sequences
+import os
 
 
 class prompter(curator.LLM):
@@ -33,7 +34,7 @@ class CuratorAPIModel(TemplateLM):
         **kwargs,
     ):
         super().__init__()
-        # os.environ["CURATOR_DISABLE_CACHE"] = "true"
+        os.environ["CURATOR_DISABLE_CACHE"] = "true"
         if tokenized_requests:
             raise NotImplementedError("Tokenized requests not implemented for curator.")
         self.tokenized_requests = False
@@ -46,6 +47,9 @@ class CuratorAPIModel(TemplateLM):
         self.gen_kwargs = {}
         self._max_gen_toks = 2048
         self.eos = None
+
+        # Disable cache since it is not necessary
+        os.environ["CURATOR_DISABLE_CACHE"] = "true"
 
     def _create_payload(
         self,
@@ -81,7 +85,8 @@ class CuratorAPIModel(TemplateLM):
         # Convert messages to the format expected by the API
         if isinstance(messages, list) and all(isinstance(m, JsonChatStr) for m in messages):
             return Dataset.from_dict({"messages": [json.loads(m.prompt) for m in messages]})
-        return messages
+        else:
+            raise ValueError("Messages must be a list of JsonChatStr objects")
 
     @staticmethod
     def parse_logprobs(
@@ -145,7 +150,8 @@ class CuratorAPIModel(TemplateLM):
             gen_kwargs[0] == gkw for gkw in gen_kwargs
         ), "Generation parameters must be the same for all requests in curator"
 
-        payload = self._create_payload(self.create_message(contexts), generate=True, gen_kwargs=gen_kwargs[0])
+        contexts_dataset = self.create_message(contexts)
+        payload = self._create_payload(contexts_dataset, generate=True, gen_kwargs=gen_kwargs[0])
         response = self.llm(payload)["response"]
         return response
 

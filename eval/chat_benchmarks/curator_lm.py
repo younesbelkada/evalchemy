@@ -33,6 +33,7 @@ class CuratorAPIModel(TemplateLM):
         **kwargs,
     ):
         super().__init__()
+        # os.environ["CURATOR_DISABLE_CACHE"] = "true"
         if tokenized_requests:
             raise NotImplementedError("Tokenized requests not implemented for curator.")
         self.tokenized_requests = False
@@ -79,7 +80,7 @@ class CuratorAPIModel(TemplateLM):
     ) -> Union[List[List[int]], List[dict], List[str], str]:
         # Convert messages to the format expected by the API
         if isinstance(messages, list) and all(isinstance(m, JsonChatStr) for m in messages):
-            return [Dataset.from_dict({"messages": json.loads(m.prompt)}) for m in messages]
+            return Dataset.from_dict({"messages": [json.loads(m.prompt) for m in messages]})
         return messages
 
     @staticmethod
@@ -111,7 +112,7 @@ class CuratorAPIModel(TemplateLM):
 
     def model_call(self, messages: Union[List[List[int]], List[str], List[JsonChatStr]], **kwargs) -> Optional[dict]:
         payload = self._create_payload(self.create_message(messages), **kwargs)
-        response = self.llm(payload)
+        response = self.llm(payload)["response"]
         return response
 
     def _loglikelihood_tokens(self, requests, **kwargs) -> List[Tuple[float, bool]]:
@@ -145,9 +146,7 @@ class CuratorAPIModel(TemplateLM):
         ), "Generation parameters must be the same for all requests in curator"
 
         payload = self._create_payload(self.create_message(contexts), generate=True, gen_kwargs=gen_kwargs[0])
-        breakpoint()
-        response = self.llm(payload)
-        breakpoint()
+        response = self.llm(payload)["response"]
         return response
 
     def loglikelihood_rolling(self, requests, disable_tqdm: bool = False) -> List[float]:

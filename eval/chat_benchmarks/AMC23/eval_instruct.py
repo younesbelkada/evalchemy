@@ -12,7 +12,6 @@ from lm_eval.api.model import LM
 from eval.task import BaseBenchmark
 from eval.chat_benchmarks.AMC23.utils import *
 
-# SYSTEM = "Answer the following math problem. Make sure to put the answer (and only answer) inside \\boxed{{}}.\n"
 PROMPT = """Problem: {problem}\nAnswer:"""
 
 class AMC23Benchmark(BaseBenchmark):
@@ -84,7 +83,6 @@ class AMC23Benchmark(BaseBenchmark):
             all_instances = []
             for idx, example in enumerate(examples):
                 try:
-                    # inputs = model.apply_chat_template([{"role": "system", "content": SYSTEM}, {"role": "user", "content": PROMPT.format(problem=example['question'])}])
                     inputs = model.apply_chat_template([{"role": "user", "content": PROMPT.format(problem=example['question'])}])
                     
                     all_instances.append(

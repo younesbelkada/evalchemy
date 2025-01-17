@@ -51,6 +51,8 @@ huggingface-cli login
   - **HumanEval**: [Code generation and problem solving](https://github.com/openai/human-eval)
   - **ZeroEval**: [Logical reasoning and problem solving](https://github.com/WildEval/ZeroEval)
   - **MBPP**: [Python programming benchmark](https://github.com/google-research/google-research/tree/master/mbpp)
+  - **AIME24**: [Math Reasoning Dataset](https://huggingface.co/datasets/AI-MO/aimo-validation-aime)
+  - **AMC23**: [Math Reasoning Dataset](https://huggingface.co/datasets/AI-MO/aimo-validation-amc)
   - **Arena-Hard-Auto** (Coming soon): [Automatic evaluation tool for instruction-tuned LLMs](https://github.com/lmarena/arena-hard-auto)
   - **SWE-Bench** (Coming soon): [Evaluating large language models on real-world software issues](https://github.com/princeton-nlp/SWE-bench)
   - **SafetyBench** (Coming soon): [Evaluating the safety of LLMs](https://github.com/thu-coai/SafetyBench)

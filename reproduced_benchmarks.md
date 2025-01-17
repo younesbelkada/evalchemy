@@ -47,5 +47,7 @@
 |             |         | databricks/dolly-v2-12b                |                               | 1.087                          | 3.28                         |
 | WildBench   | Etash   | princeton-nlp/gemma-2-9b-it-SimPO      |                               | 5.083                          | 5.33                         |
 |             |         | meta-llama/Meta-Llama-3-8B-Instruct    |                               | 3.27                           | 2.92                         |
-| IFEVal      | Negin   | meta-llama/Llama-3.1-8B-Instruct       |                               | 79.1                           | 80.4                         |
-
+| IFEval      | Negin   | meta-llama/Llama-3.1-8B-Instruct       |                               | 79.1                           | 80.4                         |
+| ZeroEval    | Negin   | meta-llama/Llama-3.1-8B-Instruct       |crux                           | 40.75                          | 39.88
+|             |         |                                        |math-l5                        | 24.69                          | 22.19
+|             |         |                                        |zebra                          | 11.70                          | 12.8

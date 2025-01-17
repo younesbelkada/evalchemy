@@ -51,5 +51,5 @@
 | ZeroEval    | Negin   | meta-llama/Llama-3.1-8B-Instruct       |crux                           | 40.75                          | 39.88
 |             |         |                                        |math-l5                        | 24.69                          | 22.19
 |             |         |                                        |zebra                          | 11.70                          | 12.8
-| AMC23      | Hritik   | Qwen/Qwen2.5-7B-Instruct       |                               | 20/40                          | 24/40                         |
-| AIME24      | Hritik   | Qwen/Qwen2.5-7B-Instruct       |                               | 4/30                         | 3/30                        |
+| AMC23      | Hritik   | Qwen/Qwen2.5-7B-Instruct       |                               | 21/40                          | 24/40                         |
+| AIME24      | Hritik   | Qwen/Qwen2.5-7B-Instruct       |                               | 3/30                         | 3/30                        |

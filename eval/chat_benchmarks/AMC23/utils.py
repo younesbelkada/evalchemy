@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 import datasets
-from lm_eval.tasks.hendrycks_math.utils import is_equiv
+from lm_eval.tasks.hendrycks_math.utils import remove_boxed, last_boxed_only_string, is_equiv
 
 def extract_answer(output: str) -> str:
     '''

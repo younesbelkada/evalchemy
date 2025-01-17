@@ -52,14 +52,10 @@ class AMC23Benchmark(BaseBenchmark):
         Yields:
             Dictionary containing task_id and formatted prompt
         """
-        try:
-            with open(data_path, "r") as f:
-                questions = [json.loads(x) for x in f]
-            self.logger.info(f"Loaded {len(questions)} questions from {data_path}")
-            return questions
-        except Exception as e:
-            self.logger.error(f"Error loading dataset: {e}")
-            raise
+        with open(data_path, "r") as f:
+            questions = [json.loads(x) for x in f]
+        self.logger.info(f"Loaded {len(questions)} questions from {data_path}")
+        return questions
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """

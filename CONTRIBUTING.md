@@ -10,6 +10,9 @@ pip install -e ".[dev]"
 # Use black before commiting
 black .
 ```
+
+Refer to the [instructions on how to add an evaluation benchmark](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#%EF%B8%8F-implementing-custom-evaluations)
+
 Add tested eval metrics against publicly reported numbers in [reproduced_benchmarks.md](reproduced_benchmarks.md).
 
 Add eval name to the list in [README.md](README.md)

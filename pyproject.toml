@@ -152,6 +152,7 @@ dev = [
     "isort",
     "flake8",
     "pre-commit",
+    "isort",
 ]
 eval = [
     # Using exact package names from their setup files

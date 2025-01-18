@@ -138,7 +138,6 @@ dependencies = [
     "threadpoolctl",
     "jmespath",
     "immutabledict",
-    "lm-eval[vllm]@git+https://github.com/EtashGuha/lm-evaluation-harness@etashg/tokenize_fix",
 ]
 
 [project.urls]
@@ -153,10 +152,12 @@ dev = [
     "flake8",
     "pre-commit",
     "isort",
+    "lm-eval"
 ]
 eval = [
     # Using exact package names from their setup files
     "fschat @ file:eval/chat_benchmarks/MTBench",  # Changed to match the likely package name
+    "lm-eval[vllm]@git+https://github.com/EtashGuha/lm-evaluation-harness@etashg/tokenize_fix",
 ]
 
 [tool.hatch.build.targets.wheel]

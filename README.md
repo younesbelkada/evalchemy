@@ -22,7 +22,7 @@ Evalchemy is a unified and easy-to-use toolkit for evaluating language models, f
 
 ### Installation
 
-We suggest using conda ([installation instructions](https://docs.anaconda.com/miniconda/#quick-command-line-install)). 
+We suggest using conda ([installation instructions](https://docs.anaconda.com/miniconda/install/#quick-command-line-install)). 
 
 ```bash
 # Create and activate conda environment

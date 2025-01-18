@@ -51,3 +51,9 @@
 | ZeroEval    | Negin   | meta-llama/Llama-3.1-8B-Instruct       |crux                           | 40.75                          | 39.88
 |             |         |                                        |math-l5                        | 24.69                          | 22.19
 |             |         |                                        |zebra                          | 11.70                          | 12.8
+| BigCodeBench   | Marianna   | Qwen/Qwen2.5-14B-Instruct           | instruct (pass@1)                       | 41.5                         | 39.8                       |
+| BigCodeBench   | Marianna   | Qwen/Qwen2.5-14B-Instruct           | complete (pass@1)                       | 52.6                         | 52.2                       |
+| BigCodeBench   | Marianna   | meta-llama/Meta-Llama-3.1-8B-Instruct          | instruct (pass@1)                       | 30.7                         | 32.8                      |
+| BigCodeBench   | Marianna   | meta-llama/Meta-Llama-3.1-8B-Instruct          | complete (pass@1)                       | 41.9                         | 40.5                     |
+| BigCodeBench   | Marianna   | Qwen/Qwen2.5-7B-Instruct          | instruct (pass@1)                       | 35.2                        | 37.6                     |
+| BigCodeBench   | Marianna   | Qwen/Qwen2.5-7B-Instruct         | complete (pass@1)                       | 46.7                         | 46.1                     |

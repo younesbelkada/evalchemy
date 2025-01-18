@@ -151,6 +151,7 @@ dev = [
     "black",
     "isort",
     "flake8",
+    "pre-commit",
 ]
 eval = [
     # Using exact package names from their setup files

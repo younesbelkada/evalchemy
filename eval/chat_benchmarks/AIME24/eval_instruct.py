@@ -14,6 +14,7 @@ from eval.chat_benchmarks.AIME24.utils import *
 
 PROMPT = """Problem: {problem}\nAnswer:"""
 
+
 class AIME24Benchmark(BaseBenchmark):
     """
     AIME24 Benchmark for evaluating the math reasoning of LLMs.
@@ -40,7 +41,6 @@ class AIME24Benchmark(BaseBenchmark):
         self.data_dir = data_dir
         self.max_tokens = max_tokens
         self.debug = debug
-
 
     def read_test_examples(self, data_path: str) -> Generator[Dict[str, str], None, None]:
         """
@@ -79,8 +79,10 @@ class AIME24Benchmark(BaseBenchmark):
             all_instances = []
             for idx, example in enumerate(examples):
                 try:
-                    inputs = model.apply_chat_template([{"role": "user", "content": PROMPT.format(problem=example['problem'])}])
-                    
+                    inputs = model.apply_chat_template(
+                        [{"role": "user", "content": PROMPT.format(problem=example["problem"])}]
+                    )
+
                     all_instances.append(
                         Instance(
                             "generate_until",
@@ -113,9 +115,9 @@ class AIME24Benchmark(BaseBenchmark):
                     example_with_output["output"] = output
                     processed_output = extract_answer(output)
                     example_with_output["processed_output"] = processed_output
-                    print(f'example: {example}')
-                    print(f'output: {output}')
-                    print(f'processed output: {processed_output}')
+                    print(f"example: {example}")
+                    print(f"output: {output}")
+                    print(f"processed output: {processed_output}")
                     generated_examples.append(example_with_output)
                 except Exception as e:
                     self.logger.error(f"Error processing output for {example['id']}: {str(e)}")
@@ -163,9 +165,8 @@ class AIME24Benchmark(BaseBenchmark):
             num_solved = 0
             total = 0
             for example in tqdm(examples):
-                num_solved += process_result(str(example['expected_answer']), example['processed_output'])
+                num_solved += process_result(str(example["expected_answer"]), example["processed_output"])
                 total += 1
-
 
             results.update(
                 {

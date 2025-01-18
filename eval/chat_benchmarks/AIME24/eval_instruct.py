@@ -1,20 +1,18 @@
 import json
-import os
-import tempfile
 import logging
+import os
+from typing import Any, Dict, Generator, Optional
 
-from tqdm import tqdm
-from typing import Dict, Any, List, Optional
-
-from lm_eval.tasks.hendrycks_math.utils import remove_boxed, last_boxed_only_string, is_equiv
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
+from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string, remove_boxed
+
 from eval.task import BaseBenchmark
 
 PROMPT = """Problem: {problem}\nAnswer:"""
 
 
-class AIME24Benchmark(BaseBenchmark):
+class AMC23Benchmark(BaseBenchmark):
     """
     AIME24 Benchmark for evaluating the math reasoning of LLMs.
     Link: https://huggingface.co/datasets/zwhe99/aime24
@@ -22,7 +20,7 @@ class AIME24Benchmark(BaseBenchmark):
 
     def __init__(
         self,
-        data_dir: str = "eval/chat_benchmarks/AIME24/data",
+        data_file: str = "eval/chat_benchmarks/AIME24/data/aime24.json",
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
     ):
@@ -36,17 +34,9 @@ class AIME24Benchmark(BaseBenchmark):
             logger: Optional logger instance
         """
         super().__init__(logger)
-        self.data_dir = data_dir
+        self.data_file = data_file
         self.debug = debug
 
-    def read_test_examples(self, data_path: str) -> List[Dict[str, str]]:
-        """Read the AIME24 dataset from the given data path."""
-        with open(data_path, "r") as f:
-            questions = [json.loads(x) for x in f]
-        self.logger.info(f"Loaded {len(questions)} questions from {data_path}")
-        return questions
-
-    # Implements abstract method from BaseBenchmark
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
         Generate solution completions using the provided model.
@@ -58,71 +48,27 @@ class AIME24Benchmark(BaseBenchmark):
             Dictionary containing generated responses and temporary directory,
             or None for non-primary ranks
         """
-        try:
-            temp_dir_obj = tempfile.TemporaryDirectory()
-            temp_dir = temp_dir_obj.name
+        examples = self.read_test_examples(self.data_file)
 
-            problem_file = os.path.join(self.data_dir, "aime24.json")
-            examples = list(self.read_test_examples(problem_file))
-            self.logger.info(f"Processing {len(examples)} examples")
+        all_instances = []
+        for idx, example in enumerate(examples):
+            messages = [{"role": "user", "content": PROMPT.format(problem=example["question"])}]
+            templated_messages = model.apply_chat_template(messages)
+            all_instances.append(Instance("generate_until", example, (templated_messages, {"do_sample": False}), idx))
 
-            all_instances = []
-            for idx, example in enumerate(examples):
-                try:
-                    inputs = model.apply_chat_template(
-                        [{"role": "user", "content": PROMPT.format(problem=example["problem"])}]
-                    )
+        self.logger.info("Generating responses for AIME24...")
+        outputs = self.compute(model, all_instances)
 
-                    all_instances.append(
-                        Instance(
-                            "generate_until",
-                            example,
-                            (
-                                inputs,
-                                {
-                                    "do_sample": False,
-                                },
-                            ),
-                            idx,
-                        )
-                    )
-                except Exception as e:
-                    self.logger.error(f"Error preparing instance {idx}: {str(e)}")
-                    continue
+        # Return None early for non-primary ranks
+        if model.rank != 0:
+            return None
 
-            self.logger.info("Generating responses for AIME24...")
-            outputs = self.compute(model, all_instances)
+        for example, output in zip(examples, outputs):
+            example["model_output"] = output
+            example["model_answer"] = self.extract_answer(output)
 
-            # Return None early for non-primary ranks
-            if model.rank != 0:
-                return None
+        return {"examples": examples}
 
-            generated_examples = []
-            for example, output in zip(examples, outputs):
-                example_with_output = example.copy()
-                example_with_output["output"] = output
-                processed_output = extract_answer(output)
-                example_with_output["processed_output"] = processed_output
-                generated_examples.append(example_with_output)
-
-            output_path = os.path.join(temp_dir, "aime24.jsonl")
-            with open(output_path, "w", encoding="utf-8") as fw:
-                for ex in generated_examples:
-                    fw.write(json.dumps(ex) + "\n")
-
-            self.logger.info(f"Saved {len(generated_examples)} examples to {output_path}")
-
-            return {
-                "temp_dir_obj": temp_dir_obj,
-                "num_examples": len(generated_examples),
-                "total_examples": len(examples),
-            }
-
-        except Exception as e:
-            self.logger.error(f"Error in generate_responses: {str(e)}")
-            raise
-
-    # Implements abstract method from BaseBenchmark
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
         """
         Evaluate the generated solution completions.
@@ -137,32 +83,46 @@ class AIME24Benchmark(BaseBenchmark):
         if results is None:
             return None
 
+        examples = results["examples"]
+        total = len(examples)
+        solved = sum(is_equiv(str(example["answer"]), example["model_answer"]) for example in examples)
+
+        results.update(
+            {
+                "num_total": total,
+                "num_solved": solved,
+                "accuracy": solved / total,
+            }
+        )
+
+        return results
+
+    def read_test_examples(self, data_path: str) -> Generator[Dict[str, str], None, None]:
+        """
+        Read and format test examples from data file.
+
+        Args:
+            data_path: Path to the data file
+
+        Yields:
+            Dictionary containing task_id and formatted prompt
+        """
+        with open(data_path, "r") as f:
+            questions = [json.loads(x) for x in f]
+        self.logger.info(f"Loaded {len(questions)} questions from {data_path}")
+        return questions
+
+    def extract_answer(output: str) -> str:
+        """Extract the final answer from a model-generated solution.
+
+        Args:
+            output (str): Model-generated solution text
+
+        Returns:
+            str: Extracted final answer. Returns empty string if no answer found in \boxed.
+        """
         try:
-            temp_dir_obj = results["temp_dir_obj"]
-            temp_dir = temp_dir_obj.name
-            result_path = os.path.join(temp_dir, "aime24.jsonl")
-
-            with open(result_path, "r") as f:
-                examples = [json.loads(x) for x in f]
-
-            num_solved = 0
-            total = 0
-            for example in tqdm(examples):
-                num_solved += int(is_equiv(str(example["expected_answer"]), example["processed_output"]))
-                total += 1
-
-            results.update(
-                {
-                    "num_examples_processed": total,
-                    "num_solved": num_solved,
-                }
-            )
-
-            temp_dir_obj.cleanup()
-            return results
-
-        except Exception as e:
-            self.logger.error(f"Error in evaluate_responses: {str(e)}")
-            if temp_dir_obj:
-                temp_dir_obj.cleanup()
-            raise
+            answer = remove_boxed(last_boxed_only_string(output))
+            return answer
+        except:
+            return ""

@@ -7,3 +7,8 @@ conda activate evalchemy
 # Install devdependencies
 pip install -e ".[dev]"
 ```
+## Linting
+```
+# Use black before commiting
+black .
+```

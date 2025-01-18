@@ -1,16 +1,15 @@
-from typing import Dict, List, Any, Generator, Optional
 import json
 import os
-import re
 import tempfile
 import logging
-from tqdm import tqdm
-from pathlib import Path
 
+from tqdm import tqdm
+from typing import Dict, Any, Generator, Optional
+
+from lm_eval.tasks.hendrycks_math.utils import remove_boxed, last_boxed_only_string, is_equiv
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
 from eval.task import BaseBenchmark
-from eval.chat_benchmarks.AMC23.utils import *
 
 PROMPT = """Problem: {problem}\nAnswer:"""
 
@@ -24,7 +23,6 @@ class AMC23Benchmark(BaseBenchmark):
     def __init__(
         self,
         data_dir: str = "eval/chat_benchmarks/AMC23/data",
-        max_tokens: int = 1024,
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
     ):
@@ -32,14 +30,13 @@ class AMC23Benchmark(BaseBenchmark):
         Initialize AMC23 benchmark.
 
         Args:
-            data_dir: Directory containing MBPP datasets
+            data_dir: Directory containing the AMC23 dataset (id, problem, reference_solution, expected_answer, source)
             max_tokens: Maximum number of tokens for generation
             debug: If set, only evaluate on 2 examples
             logger: Optional logger instance
         """
         super().__init__(logger)
         self.data_dir = data_dir
-        self.max_tokens = max_tokens
         self.debug = debug
 
     def read_test_examples(self, data_path: str) -> Generator[Dict[str, str], None, None]:
@@ -90,7 +87,6 @@ class AMC23Benchmark(BaseBenchmark):
                             (
                                 inputs,
                                 {
-                                    "max_gen_toks": self.max_tokens,
                                     "do_sample": False,
                                 },
                             ),
@@ -110,18 +106,14 @@ class AMC23Benchmark(BaseBenchmark):
 
             generated_examples = []
             for example, output in zip(examples, outputs):
-                try:
-                    example_with_output = example.copy()
-                    example_with_output["output"] = output
-                    processed_output = extract_answer(output)
-                    example_with_output["processed_output"] = processed_output
-                    print(f"example: {example}")
-                    print(f"output: {output}")
-                    print(f"processed output: {processed_output}")
-                    generated_examples.append(example_with_output)
-                except Exception as e:
-                    self.logger.error(f"Error processing output for {example['id']}: {str(e)}")
-                    continue
+                example_with_output = example.copy()
+                example_with_output["output"] = output
+                processed_output = extract_answer(output)
+                example_with_output["processed_output"] = processed_output
+                print(f"example: {example}")
+                print(f"output: {output}")
+                print(f"processed output: {processed_output}")
+                generated_examples.append(example_with_output)
 
             output_path = os.path.join(temp_dir, "amc23.jsonl")
             with open(output_path, "w", encoding="utf-8") as fw:
@@ -154,7 +146,6 @@ class AMC23Benchmark(BaseBenchmark):
         if results is None:
             return None
 
-        try:
             temp_dir_obj = results["temp_dir_obj"]
             temp_dir = temp_dir_obj.name
             result_path = os.path.join(temp_dir, "amc23.jsonl")
@@ -165,7 +156,7 @@ class AMC23Benchmark(BaseBenchmark):
             num_solved = 0
             total = 0
             for example in tqdm(examples):
-                num_solved += process_result(str(example["answer"]), example["processed_output"])
+                num_solved += int((str(example["answer"]), example["processed_output"]))
                 total += 1
 
             results.update(
@@ -178,34 +169,31 @@ class AMC23Benchmark(BaseBenchmark):
             temp_dir_obj.cleanup()
             return results
 
-        except Exception as e:
-            self.logger.error(f"Error in evaluate_responses: {str(e)}")
-            if temp_dir_obj:
-                temp_dir_obj.cleanup()
-            raise
 
-    def run_benchmark(self, model: LM) -> Dict[str, float]:
-        """
-        Run the complete AMC23 benchmark evaluation pipeline.
+# def extract_answer(output: str) -> str:
+#     """Extract the final answer from a model-generated solution.
 
-        Args:
-            model: Language model instance
+#     Args:
+#         output (str): Model-generated solution text
 
-        Returns:
-            Dictionary containing evaluation metrics, or None for non-primary ranks
-        """
-        self.logger.info("Starting AMC23 benchmark evaluation")
-        try:
-            generation_results = self.generate_responses(model)
+#     Returns:
+#         str: Extracted final answer. Returns empty string if no answer found in \boxed.
+#     """
+#     try:
+#         answer = remove_boxed(last_boxed_only_string(output))
+#         return answer
+#     except:
+#         return ""
 
-            # If not primary rank, return None early
-            if generation_results is None:
-                return None
 
-            evaluation_results = self.evaluate_responses(generate_responses)
+# def process_result(answer: str, solution: str) -> bool:
+#     """Check if the predicted answer matches the gold answer.
 
-            return evaluation_results
+#     Args:
+#         answer (str): Gold/reference final answer
+#         solution (str): Predicted final answer
 
-        except Exception as e:
-            self.logger.error(f"Error running benchmark: {str(e)}")
-            return {"error": str(e)}
+#     Returns:
+#         bool: True if answers are equivalent, False otherwise
+#     """
+#     return is_equiv(answer, solution)

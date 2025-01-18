@@ -1,16 +1,15 @@
-from typing import Dict, List, Any, Generator, Optional
 import json
 import os
-import re
 import tempfile
 import logging
-from tqdm import tqdm
-from pathlib import Path
 
+from tqdm import tqdm
+from typing import Dict, Any, List, Optional
+
+from lm_eval.tasks.hendrycks_math.utils import remove_boxed, last_boxed_only_string, is_equiv
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
 from eval.task import BaseBenchmark
-from eval.chat_benchmarks.AIME24.utils import *
 
 PROMPT = """Problem: {problem}\nAnswer:"""
 
@@ -24,7 +23,6 @@ class AIME24Benchmark(BaseBenchmark):
     def __init__(
         self,
         data_dir: str = "eval/chat_benchmarks/AIME24/data",
-        max_tokens: int = 1024,
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
     ):
@@ -32,31 +30,23 @@ class AIME24Benchmark(BaseBenchmark):
         Initialize AIME24 benchmark.
 
         Args:
-            data_dir: Directory containing MBPP datasets
+            data_dir: Directory containing the AIME24 dataset (id, problem, reference_solution, expected_answer, source)
             max_tokens: Maximum number of tokens for generation
             debug: If set, only evaluate on 2 examples
             logger: Optional logger instance
         """
         super().__init__(logger)
         self.data_dir = data_dir
-        self.max_tokens = max_tokens
         self.debug = debug
 
-    def read_test_examples(self, data_path: str) -> Generator[Dict[str, str], None, None]:
-        """
-        Read and format test examples from data file.
-
-        Args:
-            data_path: Path to the data file
-
-        Yields:
-            Dictionary containing task_id and formatted prompt
-        """
+    def read_test_examples(self, data_path: str) -> List[Dict[str, str]]:
+        """Read the AIME24 dataset from the given data path."""
         with open(data_path, "r") as f:
             questions = [json.loads(x) for x in f]
         self.logger.info(f"Loaded {len(questions)} questions from {data_path}")
         return questions
 
+    # Implements abstract method from BaseBenchmark
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
         Generate solution completions using the provided model.
@@ -90,7 +80,6 @@ class AIME24Benchmark(BaseBenchmark):
                             (
                                 inputs,
                                 {
-                                    "max_gen_toks": self.max_tokens,
                                     "do_sample": False,
                                 },
                             ),
@@ -110,18 +99,11 @@ class AIME24Benchmark(BaseBenchmark):
 
             generated_examples = []
             for example, output in zip(examples, outputs):
-                try:
-                    example_with_output = example.copy()
-                    example_with_output["output"] = output
-                    processed_output = extract_answer(output)
-                    example_with_output["processed_output"] = processed_output
-                    print(f"example: {example}")
-                    print(f"output: {output}")
-                    print(f"processed output: {processed_output}")
-                    generated_examples.append(example_with_output)
-                except Exception as e:
-                    self.logger.error(f"Error processing output for {example['id']}: {str(e)}")
-                    continue
+                example_with_output = example.copy()
+                example_with_output["output"] = output
+                processed_output = extract_answer(output)
+                example_with_output["processed_output"] = processed_output
+                generated_examples.append(example_with_output)
 
             output_path = os.path.join(temp_dir, "aime24.jsonl")
             with open(output_path, "w", encoding="utf-8") as fw:
@@ -140,6 +122,7 @@ class AIME24Benchmark(BaseBenchmark):
             self.logger.error(f"Error in generate_responses: {str(e)}")
             raise
 
+    # Implements abstract method from BaseBenchmark
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
         """
         Evaluate the generated solution completions.
@@ -165,7 +148,7 @@ class AIME24Benchmark(BaseBenchmark):
             num_solved = 0
             total = 0
             for example in tqdm(examples):
-                num_solved += process_result(str(example["expected_answer"]), example["processed_output"])
+                num_solved += int(is_equiv(str(example["expected_answer"]), example["processed_output"]))
                 total += 1
 
             results.update(
@@ -183,29 +166,3 @@ class AIME24Benchmark(BaseBenchmark):
             if temp_dir_obj:
                 temp_dir_obj.cleanup()
             raise
-
-    def run_benchmark(self, model: LM) -> Dict[str, float]:
-        """
-        Run the complete AIME24 benchmark evaluation pipeline.
-
-        Args:
-            model: Language model instance
-
-        Returns:
-            Dictionary containing evaluation metrics, or None for non-primary ranks
-        """
-        self.logger.info("Starting AIME24 benchmark evaluation")
-        try:
-            generation_results = self.generate_responses(model)
-
-            # If not primary rank, return None early
-            if generation_results is None:
-                return None
-
-            evaluation_results = self.evaluate_responses(generate_responses)
-
-            return evaluation_results
-
-        except Exception as e:
-            self.logger.error(f"Error running benchmark: {str(e)}")
-            return {"error": str(e)}

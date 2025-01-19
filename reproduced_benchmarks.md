@@ -51,5 +51,9 @@
 | ZeroEval    | Negin   | meta-llama/Llama-3.1-8B-Instruct        | crux                          | 40.75       | 39.88            |                                     |
 |             |         |                                         | math-l5                       | 24.69       | 22.19            |                                     |
 |             |         |                                         | zebra                         | 11.70       | 12.8             |                                     |
+| MixEval     | Negin   | Meta-Llama-3-8B-Instruct                | overall                       | 73.0        | 75.0             |                                     |
+|             |         |                                         | TriviaQA                      | 67.5        | 71.7             |                                     |
+|             |         |                                         | MMLU                          | 71.3        | 71.9             |                                     |
+|             |         |                                         | HellaSwag                     | 66.3        | 65.7             |                                     |
 | AMC23       | Hritik  | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 21/40       | 24/40            | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) |
 | AIME24      | Hritik  | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 3/30        | 3/30             | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) |

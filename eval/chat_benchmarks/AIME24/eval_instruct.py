@@ -8,17 +8,16 @@ from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string,
 
 from eval.task import BaseBenchmark
 
-# Via hendrycks_math
+# Modified version of hendrycks_math with additional instruction to mark the solution with \\boxed
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
-PROMPT = """Problem: {problem}\nAnswer:"""
-
+PROMPT = """Problem: {problem}\nMark your solution with \\boxed\nAnswer:"""
 
 class AIME24Benchmark(BaseBenchmark):
     """
     AIME24 Benchmark for evaluating the math reasoning of LLMs.
     Link: https://huggingface.co/datasets/zwhe99/aime24
 
-    Follows the evaluation logic of hendrycks_math for prompt and answer extraction.
+    Follows the evaluation logic of hendrycks_math answer extraction.
     """
 
     def __init__(
@@ -38,6 +37,7 @@ class AIME24Benchmark(BaseBenchmark):
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
+        self.max_new_tokens = 16384 # Setting this high to avoid truncation for reasoning models
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -55,9 +55,9 @@ class AIME24Benchmark(BaseBenchmark):
         # Prepare instances for model
         all_instances = []
         for idx, example in enumerate(examples):
-            messages = [{"role": "user", "content": PROMPT.format(problem=example["question"])}]
+            messages = [{"role": "user", "content": PROMPT.format(problem=example["problem"])}]
             templated_messages = model.apply_chat_template(messages)
-            all_instances.append(Instance("generate_until", example, (templated_messages, {"do_sample": False}), idx))
+            all_instances.append(Instance("generate_until", example, (templated_messages, {"do_sample": False, "max_new_tokens": self.max_new_tokens}), idx))
 
         # Generate model responses
         self.logger.info("Generating responses for AIME24...")
@@ -82,7 +82,7 @@ class AIME24Benchmark(BaseBenchmark):
 
         examples = results["examples"]
         total = len(examples)
-        solved = sum(is_equiv(str(example["answer"]), example["model_answer"]) for example in examples)
+        solved = sum(is_equiv(str(example["expected_answer"]), example["model_answer"]) for example in examples)
 
         results.update(
             {

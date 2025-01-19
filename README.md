@@ -41,7 +41,7 @@ huggingface-cli login
 
 ### Built-in Benchmarks
 - All tasks from [LM Evaluation Harness](https://github.com/EleutherAI/lm-evaluation-harness)
-- Custom instruction-based tasks (found in `eval/chat_benchmarks/`):
+- Custom instruction-based tasks (found in [`eval/chat_benchmarks/`](eval/chat_benchmarks/)):
   - **MTBench**: [Multi-turn dialogue evaluation benchmark](https://github.com/mtbench101/mt-bench-101)
   - **WildBench**: [Real-world task evaluation](https://github.com/allenai/WildBench)
   - **RepoBench**: [Code understanding and repository-level tasks](https://github.com/Leolty/repobench)
@@ -57,6 +57,8 @@ huggingface-cli login
   - **SWE-Bench** (Coming soon): [Evaluating large language models on real-world software issues](https://github.com/princeton-nlp/SWE-bench)
   - **SafetyBench** (Coming soon): [Evaluating the safety of LLMs](https://github.com/thu-coai/SafetyBench)
   - **Berkeley Function Calling Leaderboard** (Coming soon): [Evaluating ability of LLMs to use APIs](https://gorilla.cs.berkeley.edu/blogs/13_bfcl_v3_multi_turn.html)
+
+We have recorded reproduced results against published numbers for these benchmarks in [`reproduced_benchmarks.md`](reproduced_benchmarks.md).
 
 
 ### Basic Usage
@@ -326,7 +328,7 @@ sudo apt-get -y install cuda-toolkit-12-4
 ```
 
 ## 🏆 Leaderboard Integration
-To track experiments and evaluations, we support logging results to a PostgreSQL database. Details on the entry schemas and database setup can be found in the [database](./database/) directory.
+To track experiments and evaluations, we support logging results to a PostgreSQL database. Details on the entry schemas and database setup can be found in [`database/`](database/).
 
 ## Contributing
 Thank you to all the contributors for making this project possible!

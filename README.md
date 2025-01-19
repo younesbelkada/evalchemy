@@ -330,6 +330,10 @@ sudo apt-get -y install cuda-toolkit-12-4
 ## 🏆 Leaderboard Integration
 To track experiments and evaluations, we support logging results to a PostgreSQL database. Details on the entry schemas and database setup can be found in the [database](./database/) directory.
 
+## Contributing
+Thank you to all the contributors for making this project possible!
+Please follow [these instructions](CONTRIBUTING.md) on how to contribute.
+
 ## Citation
 If you find Evalchemy useful, please consider citing us!
 

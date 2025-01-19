@@ -27,7 +27,11 @@ We suggest using conda ([installation instructions](https://docs.anaconda.com/mi
 ```bash
 # Create and activate conda environment
 conda create --name evalchemy python=3.10
-conda activate evalchemy      
+conda activate evalchemy
+
+# Clone the repo
+git clone git@github.com:mlfoundations/evalchemy.git   
+cd evalchemy
 
 # Install dependencies
 pip install -e ".[eval]"

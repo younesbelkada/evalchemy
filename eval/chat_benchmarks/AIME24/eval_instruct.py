@@ -12,6 +12,7 @@ from eval.task import BaseBenchmark
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
 PROMPT = """Problem: {problem}\nMark your solution with \\boxed\nAnswer:"""
 
+
 class AIME24Benchmark(BaseBenchmark):
     """
     AIME24 Benchmark for evaluating the math reasoning of LLMs.
@@ -37,7 +38,7 @@ class AIME24Benchmark(BaseBenchmark):
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
-        self.max_new_tokens = 16384 # Setting this high to avoid truncation for reasoning models
+        self.max_new_tokens = 16384  # Setting this high to avoid truncation for reasoning models
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -57,7 +58,14 @@ class AIME24Benchmark(BaseBenchmark):
         for idx, example in enumerate(examples):
             messages = [{"role": "user", "content": PROMPT.format(problem=example["problem"])}]
             templated_messages = model.apply_chat_template(messages)
-            all_instances.append(Instance("generate_until", example, (templated_messages, {"do_sample": False, "max_new_tokens": self.max_new_tokens}), idx))
+            all_instances.append(
+                Instance(
+                    "generate_until",
+                    example,
+                    (templated_messages, {"do_sample": False, "max_new_tokens": self.max_new_tokens}),
+                    idx,
+                )
+            )
 
         # Generate model responses
         self.logger.info("Generating responses for AIME24...")

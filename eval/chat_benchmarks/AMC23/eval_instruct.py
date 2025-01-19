@@ -39,7 +39,7 @@ class AMC23Benchmark(BaseBenchmark):
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
-        self.max_new_tokens = 16384  # Setting this high to avoid truncation for reasoning models
+        self.max_new_tokens = 2048  # set higher to avoid truncation for reasoning models
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """

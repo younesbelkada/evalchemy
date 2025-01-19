@@ -8,6 +8,8 @@ from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string,
 
 from eval.task import BaseBenchmark
 
+# Via hendrycks_math
+# https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
 PROMPT = """Problem: {problem}\nAnswer:"""
 
 
@@ -15,6 +17,8 @@ class AIME24Benchmark(BaseBenchmark):
     """
     AIME24 Benchmark for evaluating the math reasoning of LLMs.
     Link: https://huggingface.co/datasets/zwhe99/aime24
+
+    Follows the evaluation logic of hendrycks_math for prompt and answer extraction.
     """
 
     def __init__(
@@ -98,7 +102,9 @@ class AIME24Benchmark(BaseBenchmark):
         return questions
 
     def extract_answer(self, output: str) -> str:
-        """Extract the final answer from a model-generated solution.
+        """Extract the final answer from a model-generated solution, which is expected to be in the format of \boxed{answer}.
+
+        Uses the same logic as hendrycks_math.
 
         Args:
             output (str): Model-generated solution text

@@ -58,5 +58,5 @@
 | AMC23       | Hritik  | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 21/40       | 24/40            | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
 |             | Ryan    | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 22/40       | 24/40            | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
 | AIME24      | Hritik  | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 3/30        | 3/30             | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
-|             | Ryan    | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | X/30        | 3/30             | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
+|             | Ryan    | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 4/30        | 3/30             | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
 

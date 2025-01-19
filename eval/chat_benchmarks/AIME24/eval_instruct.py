@@ -1,7 +1,6 @@
 import json
 import logging
-import os
-from typing import Any, Dict, Generator, Optional
+from typing import Any, Dict, List, Optional
 
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
@@ -12,7 +11,7 @@ from eval.task import BaseBenchmark
 PROMPT = """Problem: {problem}\nAnswer:"""
 
 
-class AMC23Benchmark(BaseBenchmark):
+class AIME24Benchmark(BaseBenchmark):
     """
     AIME24 Benchmark for evaluating the math reasoning of LLMs.
     Link: https://huggingface.co/datasets/zwhe99/aime24
@@ -28,8 +27,7 @@ class AMC23Benchmark(BaseBenchmark):
         Initialize AIME24 benchmark.
 
         Args:
-            data_dir: Directory containing the AIME24 dataset (id, problem, reference_solution, expected_answer, source)
-            max_tokens: Maximum number of tokens for generation
+            data_file: File containing the AIME24 dataset (id, problem, reference_solution, expected_answer, source)
             debug: If set, only evaluate on 2 examples
             logger: Optional logger instance
         """
@@ -42,20 +40,22 @@ class AMC23Benchmark(BaseBenchmark):
         Generate solution completions using the provided model.
 
         Args:
-            model: Language model instance
+            model: Language model
 
         Returns:
             Dictionary containing generated responses and temporary directory,
             or None for non-primary ranks
         """
-        examples = self.read_test_examples(self.data_file)
+        examples = self.load_questions()
 
+        # Prepare instances for model
         all_instances = []
         for idx, example in enumerate(examples):
             messages = [{"role": "user", "content": PROMPT.format(problem=example["question"])}]
             templated_messages = model.apply_chat_template(messages)
             all_instances.append(Instance("generate_until", example, (templated_messages, {"do_sample": False}), idx))
 
+        # Generate model responses
         self.logger.info("Generating responses for AIME24...")
         outputs = self.compute(model, all_instances)
 
@@ -70,15 +70,8 @@ class AMC23Benchmark(BaseBenchmark):
         return {"examples": examples}
 
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
-        """
-        Evaluate the generated solution completions.
+        """Evaluate the generated solution completions."""
 
-        Args:
-            results: Dictionary containing generation results
-
-        Returns:
-            Dictionary containing evaluation metrics
-        """
         # Handle None result from non-primary ranks
         if results is None:
             return None
@@ -97,22 +90,14 @@ class AMC23Benchmark(BaseBenchmark):
 
         return results
 
-    def read_test_examples(self, data_path: str) -> Generator[Dict[str, str], None, None]:
-        """
-        Read and format test examples from data file.
-
-        Args:
-            data_path: Path to the data file
-
-        Yields:
-            Dictionary containing task_id and formatted prompt
-        """
-        with open(data_path, "r") as f:
+    def load_questions(self) -> List[Dict[str, str]]:
+        """Load AIME24 questions from the data file."""
+        with open(self.data_file, "r") as f:
             questions = [json.loads(x) for x in f]
-        self.logger.info(f"Loaded {len(questions)} questions from {data_path}")
+        self.logger.info(f"Loaded {len(questions)} questions from {self.data_file}")
         return questions
 
-    def extract_answer(output: str) -> str:
+    def extract_answer(self, output: str) -> str:
         """Extract the final answer from a model-generated solution.
 
         Args:

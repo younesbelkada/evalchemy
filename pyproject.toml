@@ -150,6 +150,9 @@ dev = [
     "black",
     "isort",
     "flake8",
+    "pre-commit",
+    "isort",
+    "lm-eval"
 ]
 eval = [
     # Using exact package names from their setup files

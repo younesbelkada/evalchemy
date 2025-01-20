@@ -58,8 +58,8 @@
 | AMC23       | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 24/40       | 24/40            | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
 | AIME24      | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 3/30        | 3/30             | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
 |             |         | Qwen/Qwen2.5-32B-Instruct               | accuracy                      | 6/30        | 5/30             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
-|             |         | Qwen/QwQ-32B-Preview                    | accuracy                      | X/30        | 15/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
-|             |         | NovaSky-AI/Sky-T1-32B-Preview           | accuracy                      | X/30        | 13/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
+|             |         | Qwen/QwQ-32B-Preview                    | accuracy                      | 13/30       | 15/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
+|             |         | NovaSky-AI/Sky-T1-32B-Preview           | accuracy                      | 13/30       | 13/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
 | MATH500     | Ryan    | Qwen/Qwen2.5-32B-Instruct               | accuracy                      | 78.6        | 76.2             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
 |             |         | NovaSky-AI/Sky-T1-32B-Preview           | accuracy                      | 84.0        | 82.4             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
 | BigCodeBench| Marianna| Qwen/Qwen2.5-14B-Instruct               | instruct (pass@1)             | 41.5        | 39.8             |                                     |

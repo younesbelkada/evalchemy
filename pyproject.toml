@@ -113,7 +113,7 @@ dependencies = [
     
     # Utilities
     "tqdm",
-    "pdqm",
+    "pqdm",
     "python-box",
     "fire",
     "tiktoken",

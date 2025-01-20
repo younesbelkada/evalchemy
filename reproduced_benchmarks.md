@@ -62,3 +62,9 @@
 |             |         | Qwen/Qwen2.5-32B-Instruct               | accuracy                      | 5/30        | 5/30             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
 |             |         | Qwen/QwQ-32B-Preview                    | accuracy                      | X/30        | 15/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
 |             |         | NovaSky-AI/Sky-T1-32B-Preview           | accuracy                      | 11/30        | 13/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
+| BigCodeBench   | Marianna   | Qwen/Qwen2.5-14B-Instruct           | instruct (pass@1)                       | 41.5                         | 39.8                       ||
+|    |    | Qwen/Qwen2.5-14B-Instruct           | complete (pass@1)                       | 52.6                         | 52.2                       ||
+|    |    | meta-llama/Meta-Llama-3.1-8B-Instruct          | instruct (pass@1)                       | 30.7                         | 32.8                      ||
+|    |    | meta-llama/Meta-Llama-3.1-8B-Instruct          | complete (pass@1)                       | 41.9                         | 40.5                     ||
+|    |    | Qwen/Qwen2.5-7B-Instruct          | instruct (pass@1)                       | 35.2                        | 37.6                     ||
+|    |    | Qwen/Qwen2.5-7B-Instruct         | complete (pass@1)                       | 46.7                         | 46.1                     ||

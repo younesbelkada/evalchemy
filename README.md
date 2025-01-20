@@ -55,12 +55,16 @@ huggingface-cli login
   - **HumanEval**: [Code generation and problem solving](https://github.com/openai/human-eval)
   - **ZeroEval**: [Logical reasoning and problem solving](https://github.com/WildEval/ZeroEval)
   - **MBPP**: [Python programming benchmark](https://github.com/google-research/google-research/tree/master/mbpp)
+  - **BigCodeBench:** [Benchmarking Code Generation with Diverse Function Calls and Complex Instructions](https://arxiv.org/abs/2406.15877)
+
+    > **🚨 Warning:** for BigCodeBench evaluation, we strongly recommend using a Docker container since the execution of LLM generated code on a machine can lead to destructive outcomes. More info is [here](eval/chat_benchmarks/BigCodeBench/README.md).
   - **AIME24**: [Math Reasoning Dataset](https://huggingface.co/datasets/AI-MO/aimo-validation-aime)
   - **AMC23**: [Math Reasoning Dataset](https://huggingface.co/datasets/AI-MO/aimo-validation-amc)
   - **Arena-Hard-Auto** (Coming soon): [Automatic evaluation tool for instruction-tuned LLMs](https://github.com/lmarena/arena-hard-auto)
   - **SWE-Bench** (Coming soon): [Evaluating large language models on real-world software issues](https://github.com/princeton-nlp/SWE-bench)
   - **SafetyBench** (Coming soon): [Evaluating the safety of LLMs](https://github.com/thu-coai/SafetyBench)
   - **Berkeley Function Calling Leaderboard** (Coming soon): [Evaluating ability of LLMs to use APIs](https://gorilla.cs.berkeley.edu/blogs/13_bfcl_v3_multi_turn.html)
+  
 
 We have recorded reproduced results against published numbers for these benchmarks in [`reproduced_benchmarks.md`](reproduced_benchmarks.md).
 

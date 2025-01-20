@@ -55,8 +55,10 @@
 |             |         |                                         | TriviaQA                      | 67.5        | 71.7             |                                     |
 |             |         |                                         | MMLU                          | 71.3        | 71.9             |                                     |
 |             |         |                                         | HellaSwag                     | 66.3        | 65.7             |                                     |
-| AMC23       | Hritik  | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 21/40       | 24/40            | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
-|             | Ryan    | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 22/40       | 24/40            | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
-| AIME24      | Hritik  | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 3/30        | 3/30             | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
-|             | Ryan    | Qwen/Qwen2.5-1.5B-Instruct              | accuracy                      | 4/30        | 3/30             | [Qwen2.5-Math Technical Report](https://arxiv.org/abs/2409.12122v1) - Table 5 |
-
+| AMC23       | Hritik  | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 21/40       | 24/40            | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
+|             | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 22/40       | 24/40            | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
+| AIME24      | Hritik  | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 3/30        | 3/30             | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
+|             | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 4/30        | 3/30             | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
+|             |         | Qwen/Qwen2.5-32B-Instruct               | accuracy                      | 5/30        | 5/30             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
+|             |         | Qwen/QwQ-32B-Preview                    | accuracy                      | X/30        | 15/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
+|             |         | NovaSky-AI/Sky-T1-32B-Preview           | accuracy                      | 11/30        | 13/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |

@@ -66,3 +66,4 @@
 |             |         |                                         | complete (pass@1)             | 41.9        | 40.5             |                                     |
 |             |         | Qwen/Qwen2.5-7B-Instruct                | instruct (pass@1)             | 35.2        | 37.6             |                                     |
 |             |         |                                         | complete (pass@1)             | 46.7        | 46.1             |                                     |
+| MATH500     | Ryan    | Qwen/Qwen2.5-32B-Instruct               | accuracy                      | 78.6        | 76.2             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |

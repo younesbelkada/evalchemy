@@ -3,12 +3,12 @@
 Welcome to the Evalchemy project! We value your contributions and are excited to have you collaborate with us. This document outlines the guidelines for contributing to ensure a smooth and productive process.
 
 ## TLDR;
-```
-# Install devdependencies
-pip install -e ".[dev]"
 
-# Use black before commiting
-black .
+Get setup with
+```
+conda create -n evalchemy python=3.10
+conda activate evalchemy
+make install
 ```
 
 Refer to the [instructions on how to add an evaluation benchmark](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#%EF%B8%8F-implementing-custom-evaluations)
@@ -29,20 +29,13 @@ Add eval name to the list in [README.md](README.md)
 
 ## Setting Up the Project
 
-1. Ensure you have the following tools installed:
-   - Git
-   - Any other dependencies listed in the repository's documentation
+```bash
+conda create -n evalchemy python=3.10
+conda activate evalchemy
+make install
+```
 
-2. Create and activate the virtual environment:
-    ```bash
-    conda create --name evalchemy-dev python=3.10
-    conda activate evalchemy-dev
-    ```
-
-3. Install dependencies:
-   ```bash
-   pip install -e ".[dev]"
-   ```
+This will create a virtual environment and install the dependencies, and pre-commit hooks.
 
 ## How to Contribute
 
@@ -67,17 +60,6 @@ Add eval name to the list in [README.md](README.md)
    git push origin feature/your-benchmark-name
    ```
 9. **Submit a Pull Request**: Open a pull request (PR) to the main repository.
-
-
-## Submitting Changes
-
-1. Ensure your changes align with the project's purpose and coding standards.
-2. Update documentation if necessary.
-3. Ensure your code passes linting and formatting checks.
-   ```bash
-   black .
-   ```
-4. Submit a PR with a descriptive title and detailed description.
 
 ## Issue Reporting
 

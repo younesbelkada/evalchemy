@@ -55,16 +55,14 @@
 |             |         |                                         | TriviaQA                      | 67.5        | 71.7             |                                     |
 |             |         |                                         | MMLU                          | 71.3        | 71.9             |                                     |
 |             |         |                                         | HellaSwag                     | 66.3        | 65.7             |                                     |
-| AMC23       | Hritik  | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 21/40       | 24/40            | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
-|             | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 22/40       | 24/40            | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
-| AIME24      | Hritik  | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 3/30        | 3/30             | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
-|             | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 4/30        | 3/30             | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
-|             |         | Qwen/Qwen2.5-32B-Instruct               | accuracy                      | 5/30        | 5/30             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
+| AMC23       | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 24/40       | 24/40            | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
+| AIME24      | Ryan    | Qwen/Qwen2.5-Math-1.5B-Instruct         | accuracy                      | 3/30        | 3/30             | [Qwen2.5-Math Paper](https://arxiv.org/abs/2409.12122v1) Table 5 |
+|             |         | Qwen/Qwen2.5-32B-Instruct               | accuracy                      | 6/30        | 5/30             | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
 |             |         | Qwen/QwQ-32B-Preview                    | accuracy                      | X/30        | 15/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
-|             |         | NovaSky-AI/Sky-T1-32B-Preview           | accuracy                      | 11/30        | 13/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
-| BigCodeBench   | Marianna   | Qwen/Qwen2.5-14B-Instruct           | instruct (pass@1)                       | 41.5                         | 39.8                       ||
-|    |    | Qwen/Qwen2.5-14B-Instruct           | complete (pass@1)                       | 52.6                         | 52.2                       ||
-|    |    | meta-llama/Meta-Llama-3.1-8B-Instruct          | instruct (pass@1)                       | 30.7                         | 32.8                      ||
-|    |    | meta-llama/Meta-Llama-3.1-8B-Instruct          | complete (pass@1)                       | 41.9                         | 40.5                     ||
-|    |    | Qwen/Qwen2.5-7B-Instruct          | instruct (pass@1)                       | 35.2                        | 37.6                     ||
-|    |    | Qwen/Qwen2.5-7B-Instruct         | complete (pass@1)                       | 46.7                         | 46.1                     ||
+|             |         | NovaSky-AI/Sky-T1-32B-Preview           | accuracy                      | X/30        | 13/30            | [Sky-T1 Blog Post](https://novasky-ai.github.io/posts/sky-t1/) |
+| BigCodeBench| Marianna| Qwen/Qwen2.5-14B-Instruct               | instruct (pass@1)             | 41.5        | 39.8             |                                     |
+|             |         |                                         | complete (pass@1)             | 52.6        | 52.2             |                                     |
+|             |         | meta-llama/Meta-Llama-3.1-8B-Instruct   | instruct (pass@1)             | 30.7        | 32.8             |                                     |
+|             |         |                                         | complete (pass@1)             | 41.9        | 40.5             |                                     |
+|             |         | Qwen/Qwen2.5-7B-Instruct                | instruct (pass@1)             | 35.2        | 37.6             |                                     |
+|             |         |                                         | complete (pass@1)             | 46.7        | 46.1             |                                     |

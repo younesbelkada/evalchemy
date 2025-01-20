@@ -1,19 +1,18 @@
+import gzip
+import itertools
+import json
 import os
 import sys
-import fire
-import json
-import gzip
-import regex
-import numpy as np
-import itertools
-
-from typing import *
-from tqdm.auto import tqdm
-from collections import defaultdict
+from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from execution import check_correctness
-from collections import Counter
+from typing import *
 
+import fire
+import numpy as np
+import regex
+from tqdm.auto import tqdm
+
+from .execution import check_correctness
 
 IMPORT_HELPER = {
     "python": [
@@ -259,7 +258,6 @@ def evaluate_functional_correctness(
     sample_jsonl = stream_jsonl_all(input_file)
 
     with ThreadPoolExecutor(max_workers=n_workers) as executor:
-
         futures = []
         completion_id = Counter()
         n_samples = 0

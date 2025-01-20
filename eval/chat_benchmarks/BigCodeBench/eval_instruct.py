@@ -1,31 +1,35 @@
-from typing import Dict, Any, Optional, Union
 import json
+import logging
 import os
 import tempfile
-import logging
+import traceback
+from typing import Any, Dict, Optional, Union
+
+from datasets import load_dataset
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
-from datasets import load_dataset
-from evaluation import evaluate_functional_correctness
-from sanitize import code_extract
+
 from eval.task import BaseBenchmark
-import traceback
+
+from .evaluation import evaluate_functional_correctness
+from .sanitize import code_extract
 
 try:
     from vllm.distributed import (
-        destroy_model_parallel,
-        destroy_distributed_environment,
         cleanup_dist_env_and_memory,
+        destroy_distributed_environment,
+        destroy_model_parallel,
         init_distributed_environment,
     )
 except ImportError:
     print("Error importing vllm.distributed")
 
-import torch
 import gc
 
 # suppress warnings
 import warnings
+
+import torch
 
 warnings.filterwarnings("ignore")
 
@@ -117,10 +121,8 @@ class BigCodeBenchBenchmark(BaseBenchmark):
         temp_dir_obj = tempfile.TemporaryDirectory()
         temp_dir = temp_dir_obj.name
         for prompt_type in self.prompt_types:
-
             all_instances = []
             try:
-
                 problem_file = os.path.join(self.data_dir, f"BigCodeBench-{prompt_type}.json")
                 if not os.path.exists(problem_file):
                     self.logger.warning(f"Dataset file not found: {problem_file}")

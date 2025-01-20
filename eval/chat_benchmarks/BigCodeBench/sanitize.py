@@ -3,12 +3,13 @@
 import os
 import pathlib
 from typing import Dict, Generator, List, Optional, Set, Tuple
-from pqdm.processes import pqdm
 
-from tqdm import tqdm
 import tree_sitter_python
+from pqdm.processes import pqdm
+from tqdm import tqdm
 from tree_sitter import Language, Node, Parser
-from syncheck import syntax_check
+
+from .syncheck import syntax_check
 
 CLASS_TYPE = "class_definition"
 FUNCTION_TYPE = "function_definition"
@@ -41,7 +42,6 @@ def code_extract(text: str) -> str:
 
 
 def get_deps(nodes: List[Tuple[str, Node]]) -> Dict[str, Set[str]]:
-
     def dfs_get_deps(node: Node, deps: Set[str]) -> None:
         for child in node.children:
             if child.type == IDENTIFIER_TYPE:
@@ -183,7 +183,6 @@ def process_solution(
     is_folder: bool = False,
     target_path: str = None,
 ):
-
     task_id = sample_solution.get("task_id")
     if not task_id or task_id not in dataset:
         return None

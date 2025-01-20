@@ -23,7 +23,7 @@ class AIME24Benchmark(BaseBenchmark):
 
     def __init__(
         self,
-        data_file: str = "eval/chat_benchmarks/MATH500/data/math500.json",
+        data_file: str = "eval/chat_benchmarks/MATH500/data/math500.jsonl",
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
     ):

@@ -68,6 +68,13 @@ class CuratorAPIModel(TemplateLM):
                     "content_filter"
                 ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"
             }
+            # hard code for now but should be passed in through model_args
+            if self.model_name == "gemini/gemini-1.5-flash":
+                backend_kwargs["max_requests_per_minute"] = 2_000
+                backend_kwargs["max_tokens_per_minute"] = 4_000_000
+            elif self.model_name == "gemini/gemini-1.5-pro":
+                backend_kwargs["max_requests_per_minute"] = 1_000
+                backend_kwargs["max_tokens_per_minute"] = 4_000_000
             self.llm = curator.LLM(
                 model_name=self.model_name, generation_params=gen_kwargs, backend_params=backend_kwargs
             )

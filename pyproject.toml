@@ -104,7 +104,7 @@ dependencies = [
     "requests>=2.28",
     "websocket",
     "aiofiles",
-    "bespokelabs-curator",
+    "bespokelabs-curator @ git+https://github.com/bespokelabsai/curator.git@main",
     
     # Database
     "sqlalchemy",
@@ -114,6 +114,7 @@ dependencies = [
     
     # Utilities
     "tqdm",
+    "pqdm",
     "python-box",
     "fire",
     "tiktoken",
@@ -139,6 +140,14 @@ dependencies = [
     "threadpoolctl",
     "jmespath",
     "immutabledict",
+
+    # BigCodeBench
+    "appdirs>=1.4.4",
+    "multipledispatch>=0.6.0",
+    "pqdm>=0.2.0",
+    "tempdir>=0.7.1",
+    "tree_sitter_languages>=1.10.2",
+    "wget>=3.2"
 ]
 
 [project.urls]
@@ -151,6 +160,9 @@ dev = [
     "black",
     "isort",
     "flake8",
+    "pre-commit",
+    "isort",
+    "lm-eval"
 ]
 eval = [
     # Using exact package names from their setup files

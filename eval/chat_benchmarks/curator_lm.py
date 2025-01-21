@@ -1,23 +1,14 @@
-from typing import List, Dict, Any, Optional, Union, Tuple
 import json
+import os
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from bespokelabs import curator
 from datasets import Dataset
-
-from lm_eval.api.model import TemplateLM
-from lm_eval.models.api_models import JsonChatStr
-from lm_eval.api.registry import register_model
 from lm_eval.api.instance import Instance
+from lm_eval.api.model import TemplateLM
+from lm_eval.api.registry import register_model
+from lm_eval.models.api_models import JsonChatStr
 from lm_eval.models.utils import handle_stop_sequences
-import os
-
-
-class CuratorPrompter(curator.LLM):
-    def prompt(self, row):
-        return row["messages"]
-
-    def parse(self, row, response):
-        return {"response": response}
 
 
 @register_model("curator")
@@ -92,10 +83,20 @@ class CuratorAPIModel(TemplateLM):
                 "temperature": temperature,
                 "stop": stop,
             }
-            self.llm = CuratorPrompter(
-                model_name=self.model_name,
-                generation_params=gen_kwargs,
-                backend_params=backend_params,
+            backend_kwargs = {
+                "invalid_finish_reasons": [
+                    "content_filter"
+                ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"
+            }
+            # hard code for now but should be passed in through model_args
+            if self.model_name == "gemini/gemini-1.5-flash":
+                backend_kwargs["max_requests_per_minute"] = 2_000
+                backend_kwargs["max_tokens_per_minute"] = 4_000_000
+            elif self.model_name == "gemini/gemini-1.5-pro":
+                backend_kwargs["max_requests_per_minute"] = 1_000
+                backend_kwargs["max_tokens_per_minute"] = 4_000_000
+            self.llm = curator.LLM(
+                model_name=self.model_name, generation_params=gen_kwargs, backend_params=backend_kwargs
             )
         else:
             assert self.gen_kwargs == gen_kwargs, "Generation parameters must be the same for all requests in curator"
@@ -107,7 +108,7 @@ class CuratorAPIModel(TemplateLM):
     ) -> Union[List[List[int]], List[dict], List[str], str]:
         # Convert messages to the format expected by the API
         if isinstance(messages, list) and all(isinstance(m, JsonChatStr) for m in messages):
-            return Dataset.from_dict({"messages": [json.loads(m.prompt) for m in messages]})
+            return [json.loads(m.prompt) for m in messages]
         else:
             raise ValueError("Messages must be a list of JsonChatStr objects")
 

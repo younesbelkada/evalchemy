@@ -11,14 +11,6 @@ from lm_eval.models.api_models import JsonChatStr
 from lm_eval.models.utils import handle_stop_sequences
 
 
-class prompter(curator.LLM):
-    def prompt(self, row):
-        return row["messages"]
-
-    def parse(self, row, response):
-        return {"response": response}
-
-
 @register_model("curator")
 class CuratorAPIModel(TemplateLM):
     def __init__(
@@ -76,7 +68,9 @@ class CuratorAPIModel(TemplateLM):
                     "content_filter"
                 ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"
             }
-            self.llm = prompter(model_name=self.model_name, generation_params=gen_kwargs, backend_params=backend_kwargs)
+            self.llm = curator.LLM(
+                model_name=self.model_name, generation_params=gen_kwargs, backend_params=backend_kwargs
+            )
         else:
             assert self.gen_kwargs == gen_kwargs, "Generation parameters must be the same for all requests in curator"
             assert self.eos == eos, "EOS must be the same for all requests in curator"

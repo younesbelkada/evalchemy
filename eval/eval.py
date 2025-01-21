@@ -253,10 +253,13 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
         with open(args.config, "r") as file:
             tasks_yaml = yaml.safe_load(file)
         args.tasks = ",".join([t["task_name"] for t in tasks_yaml["tasks"]])
-        batch_sizes_list = [t["batch_size"] for t in tasks_yaml["tasks"]]
+        batch_sizes_list = [int(t["batch_size"]) if t["batch_size"] != "auto" else "auto" for t in tasks_yaml["tasks"]]
         args.annotator_model = tasks_yaml.get("annotator_model", args.annotator_model)
     else:
-        batch_sizes_list = [args.batch_size for _ in range(len(args.tasks.split(",")))]
+        batch_sizes_list = [
+            int(args.batch_size) if args.batch_size != "auto" else args.batch_size
+            for _ in range(len(args.tasks.split(",")))
+        ]
 
     # Initialize evaluation tracker
     if args.output_path:
@@ -299,7 +302,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
 
     # Initialize model
     try:
-        lm = initialize_model(args.model, args.model_args)
+        lm = initialize_model(args.model, args.model_args, batch_size=args.batch_size)
     except Exception as e:
         utils.eval_logger.error(f"Failed to initialize model: {str(e)}")
         sys.exit(1)
@@ -367,6 +370,7 @@ def initialize_model(
     model: Union[str, LM],
     model_args: Optional[str] = None,
     device: Optional[str] = None,
+    batch_size: Optional[int] = None,
 ) -> LM:
     """
     Initialize the language model based on provided configuration.
@@ -393,6 +397,10 @@ def initialize_model(
         config = {
             "device": device,
         }
+
+        if "batch_size" not in model_args:
+            if batch_size is not None:
+                model_args += f",batch_size={batch_size}"
 
         lm = lm_eval.api.registry.get_model(model).create_from_arg_string(
             model_args,

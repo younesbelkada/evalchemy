@@ -1,15 +1,14 @@
-from typing import List, Dict, Any, Optional, Union, Tuple
 import json
+import os
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from bespokelabs import curator
 from datasets import Dataset
-
-from lm_eval.api.model import TemplateLM
-from lm_eval.models.api_models import JsonChatStr
-from lm_eval.api.registry import register_model
 from lm_eval.api.instance import Instance
+from lm_eval.api.model import TemplateLM
+from lm_eval.api.registry import register_model
+from lm_eval.models.api_models import JsonChatStr
 from lm_eval.models.utils import handle_stop_sequences
-import os
 
 
 class prompter(curator.LLM):
@@ -72,7 +71,12 @@ class CuratorAPIModel(TemplateLM):
                 "temperature": temperature,
                 "stop": stop,
             }
-            self.llm = prompter(model_name=self.model_name, generation_params=gen_kwargs)
+            backend_kwargs = {
+                "invalid_finish_reasons": [
+                    "content_filter"
+                ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"
+            }
+            self.llm = prompter(model_name=self.model_name, generation_params=gen_kwargs, backend_params=backend_kwargs)
         else:
             assert self.gen_kwargs == gen_kwargs, "Generation parameters must be the same for all requests in curator"
             assert self.eos == eos, "EOS must be the same for all requests in curator"
@@ -83,7 +87,7 @@ class CuratorAPIModel(TemplateLM):
     ) -> Union[List[List[int]], List[dict], List[str], str]:
         # Convert messages to the format expected by the API
         if isinstance(messages, list) and all(isinstance(m, JsonChatStr) for m in messages):
-            return Dataset.from_dict({"messages": [json.loads(m.prompt) for m in messages]})
+            return [json.loads(m.prompt) for m in messages]
         else:
             raise ValueError("Messages must be a list of JsonChatStr objects")
 

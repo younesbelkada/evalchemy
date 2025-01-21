@@ -17,7 +17,7 @@ Then, specify your command. For example, you can use vLLM backend for generation
 ```bash
 CMD="python -m eval.eval \
     --model vllm \
-    --tasks BigCodeBench \
+    --tasks MultiPLE \
     --model_args pretrained=Qwen/Qwen2.5-7B-Instruct \
     --batch_size auto"
 ```
@@ -26,7 +26,7 @@ Then you can run the evaluation inside the container:
 
 ```bash
 docker run --gpus \
-    -v $(pwd):/app -t marianna13/evalchemy:latest \
+    -v $(pwd):/app -t marianna13/evalchemy_multiple:latest \
     $CMD
 ```
 

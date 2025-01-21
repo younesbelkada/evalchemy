@@ -63,7 +63,7 @@ class AMC23Benchmark(BaseBenchmark):
                 Instance(
                     "generate_until",
                     example,
-                    (templated_messages, {"do_sample": False}),
+                    (templated_messages, {"do_sample": False, "max_new_tokens": self.max_new_tokens}),
                     idx,
                 )
             )

@@ -20,23 +20,21 @@ class SWEBenchBenchmark(BaseBenchmark):
     def __init__(
         self,
         dataset_name: str = "princeton-nlp/SWE-bench_Lite",
-        split: str = "test",
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
         max_tokens: int = 4096,
     ):
         super().__init__(logger)
-        self.split = split
         self.debug = debug
         self.max_tokens = max_tokens
         self.dataset_name = dataset_name
         """
         Options for <dataset + split(s)>:
-        - princeton-nlp/SWE-bench (dev, test)
-        - princeton-nlp/SWE-bench_Lite (test)
-        - princeton-nlp/SWE-bench_Verified (test)
+        - princeton-nlp/SWE-bench
+        - princeton-nlp/SWE-bench_Lite
+        - princeton-nlp/SWE-bench_Verified
         """
-        self.dataset = load_dataset(self.dataset_name, split=self.split)
+        self.dataset = load_dataset(self.dataset_name, split="test")
     
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -87,7 +85,7 @@ class SWEBenchBenchmark(BaseBenchmark):
                 "model_patch": output["model_patch"],
             }
 
-        output_file = f"{self.dataset_name.split("/")[-1]}_{self.split}.json"
+        output_file = f"{self.dataset_name.split("/")[-1]}.json"
         output_path = f"{temp_dir}/{output_file}"
         with open(output_path, "w") as f:
             json.dump(results, f, indent=2)
@@ -100,7 +98,7 @@ class SWEBenchBenchmark(BaseBenchmark):
 
         report_path = run_evaluation(
             dataset_name=self.dataset_name,
-            split=self.split,
+            split="test",
             predictions_path=predictions_path,
             instance_ids=None,
             max_workers=4,

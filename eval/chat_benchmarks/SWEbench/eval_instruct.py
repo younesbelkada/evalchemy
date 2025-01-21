@@ -1,8 +1,10 @@
 import json
 import logging
+import tempfile
 
 from datasets import load_dataset
 from eval.task import BaseBenchmark
+from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
 from swebench.harness.run_evaluation import main as run_evaluation
 from typing import Any, Dict, Optional
@@ -17,35 +19,89 @@ class SWEBenchBenchmark(BaseBenchmark):
     """
     def __init__(
         self,
-        dataset: str = "princeton-nlp/SWE-bench_Lite",
+        dataset_name: str = "princeton-nlp/SWE-bench_Lite",
         split: str = "test",
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
+        max_tokens: int = 4096,
     ):
         super().__init__(logger)
         self.split = split
         self.debug = debug
+        self.max_tokens = max_tokens
+        self.dataset_name = dataset_name
         """
         Options for <dataset + split(s)>:
         - princeton-nlp/SWE-bench (dev, test)
         - princeton-nlp/SWE-bench_Lite (test)
         - princeton-nlp/SWE-bench_Verified (test)
-        - princeton-nlp/SWE-bench_Multimodal (dev, test)
         """
-        self.dataset = load_dataset(dataset, split=self.split)
+        self.dataset = load_dataset(self.dataset_name, split=self.split)
     
     def generate_responses(self, model: LM) -> Dict[str, Any]:
-        pass
+        """
+        NOTE: EvalAlchemy's version of SWE-bench evalutes models in a RAG
+        based setting (not agentic). The "Oracle" retrieval setting is used for
+        this evaluation (to learn more, refer to https://arxiv.org/abs/2310.06770)
+        """
+        results = {}
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        temp_dir = temp_dir_obj.name
 
-    
+        instances = [
+            x for x in load_dataset("princeton-nlp/SWE-bench_oracle", split="test")
+            if x['instance_id'] in self.dataset['instance_id']
+        ]
+
+        if self.debug:
+            instances = instances[:2]
+            self.logger.info("Debug mode: using first 2 instances only")
+
+        all_instances = []
+        for idx, instance in enumerate(instances):
+            inputs = model.apply_chat_template([{"role": "user", "content": instance["text"]}])
+            all_instances.append(
+                Instance(
+                    "generate_until",
+                    instance,
+                    (
+                        inputs,
+                        {
+                            "max_gen_toks": self.max_tokens,
+                            "temperature": 0.2,
+                            "top_p": 0.95,
+                            "do_sample": False,
+                        }
+                    ),
+                    idx,
+                )
+            )
+        self.logger.info("Generating responses for SWE-bench...")
+        outputs = self.compute(model, all_instances)
+
+        results = {}
+        for idx, (instance, output) in enumerate(zip(instances, outputs)):
+            results[instance["instance_id"]] = {
+                "instance_id": instance["instance_id"],
+                "model_name_or_path": model.model_identifier,
+                "model_patch": output["model_patch"],
+            }
+
+        output_file = f"{self.dataset_name.split("/")[-1]}_{self.split}.json"
+        output_path = f"{temp_dir}/{output_file}"
+        with open(output_path, "w") as f:
+            json.dump(results, f, indent=2)
+
+        return {"temp_dir_obj": temp_dir_obj, "predictions_path": output_path}
+
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
-        with open(PREDS_PATH, "w") as f:
-            json.dump(results, f)
+        temp_dir_obj = results["temp_dir_obj"]
+        predictions_path = results["predictions_path"]
 
-        run_evaluation(
+        report_path = run_evaluation(
             dataset_name=self.dataset_name,
             split=self.split,
-            predictions_path=PREDS_PATH,
+            predictions_path=predictions_path,
             instance_ids=None,
             max_workers=4,
             force_rebuild=False,
@@ -61,8 +117,14 @@ class SWEBenchBenchmark(BaseBenchmark):
             report_dir="."
         )
 
-        return json.load(open(""))
-    
+        temp_dir_obj.cleanup()
+        if report_path is None:
+            self.logger.error("Error evaluating SWE-bench")
+            return None
+
+        return json.load(open(report_path))
+
+
     def run_benchmark(self, model: LM) -> Dict[str, float]:
         self.logger.info("Starting SWE-bench evaluation")
         try:

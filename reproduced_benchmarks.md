@@ -69,3 +69,4 @@
 |             |         |                                         | complete (pass@1)             | 41.9        | 40.5             |                                     |
 |             |         | Qwen/Qwen2.5-7B-Instruct                | instruct (pass@1)             | 35.2        | 37.6             |                                     |
 |             |         |                                         | complete (pass@1)             | 46.7        | 46.1             |                                     |
+| LiveBench   | Negin   | Meta-Llama-3-8B-Instruct                | global_average                | 23.77        | 26.74            | https://livebench.ai/#/?q=3.1

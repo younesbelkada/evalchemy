@@ -1,2 +1,3 @@
 ,np.tanh(std_delta_len),instruction_difficulty,not_gamed_baseline.astype(float)
 "model_curator_model_args_pretrained=claude-3-5-haiku-20241022,tokenized_requests=False",-1.8366974017900992,0.7446564084265157,-7.2599824829397441
+"model_curator_model_args_pretrained=gpt-4o-mini-2024-07-18,tokenized_requests=False",-1.7052487285212568,0.3381921818177004,0.5963566226936441

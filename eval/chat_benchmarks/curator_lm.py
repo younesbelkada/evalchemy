@@ -12,7 +12,7 @@ from lm_eval.models.utils import handle_stop_sequences
 import os
 
 
-class prompter(curator.LLM):
+class CuratorPrompter(curator.LLM):
     def prompt(self, row):
         return row["messages"]
 
@@ -27,26 +27,44 @@ class CuratorAPIModel(TemplateLM):
         model: str = None,
         pretrained: str = None,
         max_length: Optional[int] = 2048,
-        num_concurrent: int = 1,
-        max_retries: int = 3,
+        max_retries: int = 10,
         timeout: int = 300,
         tokenized_requests: bool = False,
+        max_requests_per_minute: int = None,
+        max_tokens_per_minute: int = None,
+        seconds_to_pause_on_rate_limit: int = None,
         **kwargs,
     ):
         super().__init__()
+
+        self.model_name = model or pretrained
+
+        if "gemini" in self.model_name:
+            max_requests_per_minute = max_requests_per_minute or 2000
+            max_tokens_per_minute = max_tokens_per_minute or 4_000_000
+        elif "claude" in self.model_name:
+            max_requests_per_minute = max_requests_per_minute or 2000
+            max_tokens_per_minute = max_tokens_per_minute or 80_000
+
         os.environ["CURATOR_DISABLE_CACHE"] = "true"
         if tokenized_requests:
             raise NotImplementedError("Tokenized requests not implemented for curator.")
         self.tokenized_requests = False
-        self.model_name = model or pretrained
         self.max_length = max_length
-        self.num_concurrent = num_concurrent
-        self.max_retries = max_retries
-        self.timeout = timeout
         self.llm = None
         self.gen_kwargs = {}
         self._max_gen_toks = 2048
         self.eos = None
+        self.backend_params = kwargs
+        self.backend_params["require_all_responses"] = False
+        self.backend_params["request_timeout"] = timeout
+        self.backend_params["max_retries"] = max_retries
+        if max_requests_per_minute is not None:
+            self.backend_params["max_requests_per_minute"] = max_requests_per_minute
+        if max_tokens_per_minute is not None:
+            self.backend_params["max_tokens_per_minute"] = max_tokens_per_minute
+        if seconds_to_pause_on_rate_limit is not None:
+            self.backend_params["seconds_to_pause_on_rate_limit"] = seconds_to_pause_on_rate_limit
 
         # Disable cache since it is not necessary
         os.environ["CURATOR_DISABLE_CACHE"] = "true"
@@ -58,6 +76,7 @@ class CuratorAPIModel(TemplateLM):
         generate: bool = False,
         gen_kwargs: Optional[dict] = None,
         eos=None,
+        backend_params=None,
         **kwargs,
     ) -> dict:
         assert generate, "Curator only supports generation."
@@ -73,7 +92,11 @@ class CuratorAPIModel(TemplateLM):
                 "temperature": temperature,
                 "stop": stop,
             }
-            self.llm = prompter(model_name=self.model_name, generation_params=gen_kwargs)
+            self.llm = CuratorPrompter(
+                model_name=self.model_name,
+                generation_params=gen_kwargs,
+                backend_params=backend_params,
+            )
         else:
             assert self.gen_kwargs == gen_kwargs, "Generation parameters must be the same for all requests in curator"
             assert self.eos == eos, "EOS must be the same for all requests in curator"
@@ -151,7 +174,9 @@ class CuratorAPIModel(TemplateLM):
         ), "Generation parameters must be the same for all requests in curator"
 
         contexts_dataset = self.create_message(contexts)
-        payload = self._create_payload(contexts_dataset, generate=True, gen_kwargs=gen_kwargs[0])
+        payload = self._create_payload(
+            contexts_dataset, generate=True, gen_kwargs=gen_kwargs[0], backend_params=self.backend_params
+        )
         response = self.llm(payload)["response"]
         return response
 

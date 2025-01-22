@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from bespokelabs import curator
@@ -37,7 +38,6 @@ class CuratorAPIModel(TemplateLM):
             max_requests_per_minute = max_requests_per_minute or 2000
             max_tokens_per_minute = max_tokens_per_minute or 80_000
 
-        os.environ["CURATOR_DISABLE_CACHE"] = "true"
         if tokenized_requests:
             raise NotImplementedError("Tokenized requests not implemented for curator.")
         self.tokenized_requests = False
@@ -87,17 +87,20 @@ class CuratorAPIModel(TemplateLM):
             self.eos = eos
             self.gen_kwargs = gen_kwargs.copy()
             self.llm = curator.LLM(
-                model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params
+                model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params.copy()
             )
         else:
             if self.gen_kwargs != gen_kwargs:
                 print(
                     "Recreating curator LLM with new generation parameters, make sure this doesn't happen at every request"
                 )
-                self.llm = curator.LLM(
-                    model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params
-                )
+                # Sleep to make sure the previous request is finished
+                time.sleep(10)
                 self.gen_kwargs = gen_kwargs.copy()
+                breakpoint()
+                self.llm = curator.LLM(
+                    model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params.copy()
+                )
         return messages
 
     def create_message(
@@ -157,6 +160,19 @@ class CuratorAPIModel(TemplateLM):
         # Assuming the model has a specific end-of-text token ID
         return self.llm.eot_token_id  # Replace with actual method to get EOT token ID
 
+    def _group_gen_kwargs(self, gen_kwargs: List[dict]) -> List[Tuple[List[int], dict]]:
+        """
+        Group identical generation parameters together and return a list of indices that share the same generation parameters
+        """
+        ordered_set_gen_kwargs = []
+        for gkw in gen_kwargs:
+            if gkw not in ordered_set_gen_kwargs:
+                ordered_set_gen_kwargs.append(gkw)
+        return [
+            [i for i, gkw in enumerate(gen_kwargs) if gkw == ordered_set_gen_kwargs[j]]
+            for j in range(len(ordered_set_gen_kwargs))
+        ], ordered_set_gen_kwargs
+
     def generate_until(self, requests: List[Instance], disable_tqdm: bool = False) -> List[str]:
         # Tokenize contexts if required
         if self.tokenized_requests:
@@ -166,14 +182,21 @@ class CuratorAPIModel(TemplateLM):
         contexts = [req.args[0] for req in requests]
         gen_kwargs = [req.args[1] for req in requests]
 
-        # Assert all gen_kwargs are the same
-        assert all(
-            gen_kwargs[0] == gkw for gkw in gen_kwargs
-        ), "Generation parameters must be the same for all requests in curator"
+        list_indices, gen_kwargs = self._group_gen_kwargs(gen_kwargs)
 
-        contexts_dataset = self.create_message(contexts)
-        payload = self._create_payload(contexts_dataset, generate=True, gen_kwargs=gen_kwargs[0])
-        response = self.llm(payload)["response"]
+        # Curator needs a new object for each set of gen_kwargs
+        # Generate responses for each group of generation parameters
+        response_list = []
+        for indices, gkw in zip(list_indices, gen_kwargs):
+            contexts_dataset = self.create_message([contexts[i] for i in indices])
+            payload = self._create_payload(contexts_dataset, generate=True, gen_kwargs=gkw)
+            response_list.append(self.llm(payload)["response"])
+
+        # Re-order responses to match the original request order
+        response = [None] * len(requests)
+        for i, indices in enumerate(list_indices):
+            for idx in indices:
+                response[idx] = response_list[i]
         return response
 
     def loglikelihood_rolling(self, requests, disable_tqdm: bool = False) -> List[float]:

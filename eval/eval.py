@@ -35,7 +35,7 @@ def setup_custom_parser():
     Create a custom argument parser that extends lm-eval-harness parser.
     """
     parser = setup_parser()
-    db_group = parser.add_mutually_exclusive_group()
+    db_group = parser.add_argument_group("database")
 
     db_group.add_argument("--model_id", type=str, default=None, help="Model UUID for direct database tracking")
 

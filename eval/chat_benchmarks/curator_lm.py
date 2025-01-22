@@ -44,7 +44,6 @@ class CuratorAPIModel(TemplateLM):
         self.max_length = max_length
         self.llm = None
         self.gen_kwargs = {}
-        self._max_gen_toks = 2048
         self.eos = None
         self.backend_params = {
             "invalid_finish_reasons": [
@@ -75,7 +74,7 @@ class CuratorAPIModel(TemplateLM):
     ) -> dict:
         assert generate, "Curator only supports generation."
         # Create the payload for the API request
-        max_tokens = gen_kwargs.get("max_gen_toks", self._max_gen_toks)
+        max_tokens = gen_kwargs.get("max_gen_toks", self.max_length)
         temperature = gen_kwargs.get("temperature", 0)
         stop = handle_stop_sequences(gen_kwargs.get("until", None), eos)
         gen_kwargs = {
@@ -94,10 +93,7 @@ class CuratorAPIModel(TemplateLM):
                 print(
                     "Recreating curator LLM with new generation parameters, make sure this doesn't happen at every request"
                 )
-                # Sleep to make sure the previous request is finished
-                time.sleep(10)
                 self.gen_kwargs = gen_kwargs.copy()
-                breakpoint()
                 self.llm = curator.LLM(
                     model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params.copy()
                 )

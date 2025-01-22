@@ -46,10 +46,14 @@ class CuratorAPIModel(TemplateLM):
         self.gen_kwargs = {}
         self._max_gen_toks = 2048
         self.eos = None
-        self.backend_params = {}
-        self.backend_params["require_all_responses"] = False
-        self.backend_params["request_timeout"] = timeout
-        self.backend_params["max_retries"] = max_retries
+        self.backend_params = {
+            "invalid_finish_reasons": [
+                "content_filter"
+            ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"}
+            "require_all_responses": False,
+            "request_timeout": timeout,
+            "max_retries": max_retries,
+        }
         if max_requests_per_minute is not None:
             self.backend_params["max_requests_per_minute"] = max_requests_per_minute
         if max_tokens_per_minute is not None:
@@ -71,30 +75,29 @@ class CuratorAPIModel(TemplateLM):
     ) -> dict:
         assert generate, "Curator only supports generation."
         # Create the payload for the API request
+        max_tokens = gen_kwargs.get("max_gen_toks", self._max_gen_toks)
+        temperature = gen_kwargs.get("temperature", 0)
+        stop = handle_stop_sequences(gen_kwargs.get("until", None), eos)
+        gen_kwargs = {
+            "max_completion_tokens": max_tokens,
+            "temperature": temperature,
+            "stop": stop,
+        }
         if self.llm is None:
             self.eos = eos
-            max_tokens = gen_kwargs.get("max_gen_toks", self._max_gen_toks)
-            temperature = gen_kwargs.get("temperature", 0)
-            stop = handle_stop_sequences(gen_kwargs.get("until", None), eos)
-            gen_kwargs = {
-                "max_completion_tokens": max_tokens,
-                "temperature": temperature,
-                "stop": stop,
-            }
             self.gen_kwargs = gen_kwargs.copy()
-            backend_kwargs = {
-                "invalid_finish_reasons": [
-                    "content_filter"
-                ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"
-            }
-            backend_kwargs.update(self.backend_params)
-
             self.llm = curator.LLM(
-                model_name=self.model_name, generation_params=gen_kwargs, backend_params=backend_kwargs
+                model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params
             )
         else:
-            assert self.gen_kwargs == gen_kwargs, "Generation parameters must be the same for all requests in curator"
-            assert self.eos == eos, "EOS must be the same for all requests in curator"
+            if self.gen_kwargs != gen_kwargs:
+                print(
+                    "Recreating curator LLM with new generation parameters, make sure this doesn't happen at every request"
+                )
+                self.llm = curator.LLM(
+                    model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params
+                )
+                self.gen_kwargs = gen_kwargs.copy()
         return messages
 
     def create_message(

@@ -46,7 +46,7 @@ class CuratorAPIModel(TemplateLM):
         self.gen_kwargs = {}
         self._max_gen_toks = 2048
         self.eos = None
-        self.backend_params = kwargs
+        self.backend_params = {}
         self.backend_params["require_all_responses"] = False
         self.backend_params["request_timeout"] = timeout
         self.backend_params["max_retries"] = max_retries
@@ -67,13 +67,11 @@ class CuratorAPIModel(TemplateLM):
         generate: bool = False,
         gen_kwargs: Optional[dict] = None,
         eos=None,
-        backend_params=None,
         **kwargs,
     ) -> dict:
         assert generate, "Curator only supports generation."
         # Create the payload for the API request
         if self.llm is None:
-            self.gen_kwargs = gen_kwargs.copy()
             self.eos = eos
             max_tokens = gen_kwargs.get("max_gen_toks", self._max_gen_toks)
             temperature = gen_kwargs.get("temperature", 0)
@@ -83,18 +81,14 @@ class CuratorAPIModel(TemplateLM):
                 "temperature": temperature,
                 "stop": stop,
             }
+            self.gen_kwargs = gen_kwargs.copy()
             backend_kwargs = {
                 "invalid_finish_reasons": [
                     "content_filter"
                 ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"
             }
-            # hard code for now but should be passed in through model_args
-            if self.model_name == "gemini/gemini-1.5-flash":
-                backend_kwargs["max_requests_per_minute"] = 2_000
-                backend_kwargs["max_tokens_per_minute"] = 4_000_000
-            elif self.model_name == "gemini/gemini-1.5-pro":
-                backend_kwargs["max_requests_per_minute"] = 1_000
-                backend_kwargs["max_tokens_per_minute"] = 4_000_000
+            backend_kwargs.update(self.backend_params)
+
             self.llm = curator.LLM(
                 model_name=self.model_name, generation_params=gen_kwargs, backend_params=backend_kwargs
             )
@@ -175,9 +169,7 @@ class CuratorAPIModel(TemplateLM):
         ), "Generation parameters must be the same for all requests in curator"
 
         contexts_dataset = self.create_message(contexts)
-        payload = self._create_payload(
-            contexts_dataset, generate=True, gen_kwargs=gen_kwargs[0], backend_params=self.backend_params
-        )
+        payload = self._create_payload(contexts_dataset, generate=True, gen_kwargs=gen_kwargs[0])
         response = self.llm(payload)["response"]
         return response
 

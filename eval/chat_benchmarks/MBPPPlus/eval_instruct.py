@@ -48,7 +48,7 @@ class MBPPPlusBenchmark(BaseBenchmark):
         self.num_examples = 3
         self.start_idx = 0
         self.end_idx = 500
-    
+
     def format_test_example(self, question: str, tests: List[str], code: Optional[str] = None) -> str:
         """Format a single test example."""
         prompt = ">>> Problem:\n{}\n>>> Test Cases:\n{}\n".format(question.strip(), "\n".join(tests))
@@ -56,7 +56,7 @@ class MBPPPlusBenchmark(BaseBenchmark):
             code = code.replace("\r", "").replace("\t", "    ")
             prompt += "\n>>> Code:\n```python\n{}\n```".format(code)
         return prompt
-    
+
     def read_test_examples(self, data_path: str) -> Generator[Dict[str, str], None, None]:
         """
         Read and format test examples from data file.

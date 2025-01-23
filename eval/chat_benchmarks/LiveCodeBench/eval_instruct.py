@@ -16,6 +16,9 @@ from .livecodebench_utils import lcb_run, map_to_example, has_test_type, post_pr
 from eval.task import BaseBenchmark
 from datasets import load_dataset
 
+from lm_eval.models.vllm_causallms import VLLM
+
+
 import re
 def has_code(response):
     pattern = r"```(?:[a-zA-Z]*)\n(.*?)```"
@@ -45,8 +48,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
         """
         super().__init__(logger)
         self.debug = debug
-        self.max_gen_toks = 16384  # set higher to avoid truncation for reasoning models
-
+        self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -79,11 +81,16 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
 
             templated_messages = model.apply_chat_template(messages)
 
+            generation_args = {
+                "do_sample": False,
+                "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens
+            }
+            
             all_instances.append(
                 Instance(
                     "generate_until",
                     example,
-                    (templated_messages, {"do_sample": False, "max_gen_toks": self.max_gen_toks}),
+                    (templated_messages, generation_args),
                     idx,
                 )
             )

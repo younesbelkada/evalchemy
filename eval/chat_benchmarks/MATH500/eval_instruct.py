@@ -60,7 +60,7 @@ class AIME24Benchmark(BaseBenchmark):
         all_instances = []
         for idx, example in enumerate(examples):
             messages = [
-                {"role": "system", "content": "You are a helpful and harmless assistant. You are DeepSeek R1 developed by DeepSeek. You should think step-by-step."},
+                {"role": "system", "content": "You are a helpful and harmless assistant. You should think step-by-step."},
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])}
                 ]
             templated_messages = model.apply_chat_template(messages)
@@ -69,7 +69,7 @@ class AIME24Benchmark(BaseBenchmark):
                 "do_sample": False,
                 "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens
             }
-            
+
             all_instances.append(
                 Instance(
                     "generate_until",

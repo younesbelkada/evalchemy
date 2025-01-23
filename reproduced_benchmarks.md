@@ -69,3 +69,4 @@
 |             |         |                                         | complete (pass@1)             | 41.9        | 40.5             |                                     |
 |             |         | Qwen/Qwen2.5-7B-Instruct                | instruct (pass@1)             | 35.2        | 37.6             |                                     |
 |             |         |                                         | complete (pass@1)             | 46.7        | 46.1             |                                     |
+|LiveCodeBench| Negin   | deepseek-ai/DeepSeek-R1-Distill-Qwen-7B | (pass@1)             | 37.9        | 37.6            | [DeepSeek-R1 Paper](https://github.com/deepseek-ai/DeepSeek-R1/blob/main/DeepSeek_R1.pdf) Table 5 |

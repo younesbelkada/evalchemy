@@ -75,7 +75,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
                 prompt_text = "Generate an executable Python function generated from the given prompt. Return the function body without invoking it at the final solution." + example["prompt"]
     
             messages = [
-                {"role": "system", "content": "You are a helpful and harmless assistant. You are DeepSeek R1 developed by DeepSeek. You should think step-by-step."},
+                {"role": "system", "content": "You are a helpful and harmless assistant. You should think step-by-step."},
                 {"role": "user", "content": prompt_text}
                 ]
 
@@ -85,7 +85,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
                 "do_sample": False,
                 "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens
             }
-            
+
             all_instances.append(
                 Instance(
                     "generate_until",

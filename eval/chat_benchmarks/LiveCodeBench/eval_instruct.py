@@ -66,7 +66,8 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
         # Prepare instances for model
         all_instances = []
         for idx, example in enumerate(examples):
-            if examples["is_stdin"]:
+
+            if example["is_stdin"]:
                 prompt_text = "Generate an executable Python function generated from the given prompt. The function should take stdin as input and print the output. Simply call the function after the definition." + example["prompt"]
             else:
                 prompt_text = "Generate an executable Python function generated from the given prompt. Return the function body without invoking it at the final solution." + example["prompt"]
@@ -172,11 +173,31 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
 
     def load_questions(self) -> List[Dict[str, str]]:
         """Load LiveCodeBench questions from source."""
-        dataset = load_dataset("livecodebench/code_generation_lite", version_tag="release_v2", split='test[:500]', trust_remote_code=True)
-        dataset = dataset.map(
-            lambda example: {
-                "private_test_cases": translate_private_test_cases(example["private_test_cases"])
-            }
-        )
-        dataset = dataset.map(map_to_example, remove_columns=dataset.column_names)
-        return dataset
+        # Load dataset in smaller chunks and combine
+        all_examples = []
+        chunk_size = 200  # Process 200 examples at a time
+        
+        for i in range(0, 511, chunk_size):  # Assuming total size is 511
+            try:
+                dataset = load_dataset(
+                    "livecodebench/code_generation_lite",
+                    version_tag="release_v2",
+                    split=f'test[{i}:{i+chunk_size}]',
+                    trust_remote_code=True
+                )
+                
+                # Process chunk
+                dataset = dataset.map(
+                    lambda example: {
+                        "private_test_cases": translate_private_test_cases(example["private_test_cases"])
+                    }
+                )
+                dataset = dataset.map(map_to_example, remove_columns=dataset.column_names)
+                
+                all_examples.extend(dataset)
+                
+            except ValueError:
+                # We've reached the end of the dataset
+                break
+
+        return all_examples

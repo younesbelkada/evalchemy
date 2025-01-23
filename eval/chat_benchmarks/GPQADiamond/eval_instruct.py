@@ -58,7 +58,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         all_instances = []
 
         for idx, example in enumerate(examples):
-            multiple_choice_string, correct_answer = self.get_multiple_choice_answers(example)
+            multiple_choice_string, correct_answer = self.generate_multiple_choice_answers(example)
             example["answer"] = correct_answer
             
             messages = [
@@ -125,7 +125,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         self.logger.info(f"Loaded {len(questions)} questions from {self.dataset_name}")
         return questions
 
-    def get_multiple_choice_answers(self, data: Dict[str, Any]) -> tuple[str, str]:
+    def generate_multiple_choice_answers(self, data: Dict[str, Any]) -> tuple[str, str]:
         """Generate multiple choice string and correct answer letter."""
         answers = [
             data["Correct Answer"],

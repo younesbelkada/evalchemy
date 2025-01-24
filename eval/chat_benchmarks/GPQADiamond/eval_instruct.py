@@ -60,19 +60,19 @@ class GPQADiamondBenchmark(BaseBenchmark):
         for idx, example in enumerate(examples):
             multiple_choice_string, correct_answer = self.generate_multiple_choice_answers(example)
             example["answer"] = correct_answer
-            
+
             messages = [
-                {"role": "system", "content": "You are a helpful and harmless assistant. You should think step-by-step."},
-                {"role": "user", "content": PROMPT.format(
-                    problem=example["Question"],
-                    options=multiple_choice_string
-                )}
+                {
+                    "role": "system",
+                    "content": "You are a helpful and harmless assistant. You should think step-by-step.",
+                },
+                {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
             ]
             templated_messages = model.apply_chat_template(messages)
 
             generation_args = {
                 "do_sample": False,
-                "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens
+                "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens,
             }
 
             all_instances.append(
@@ -96,7 +96,6 @@ class GPQADiamondBenchmark(BaseBenchmark):
             example["model_output"] = output
             example["model_answer"] = get_multiple_choice_answer(output)
 
-
         return {"examples": examples}
 
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
@@ -108,11 +107,13 @@ class GPQADiamondBenchmark(BaseBenchmark):
         total = len(examples)
         solved = sum(example["answer"] == example["model_answer"] for example in examples)
 
-        results.update({
-            "num_total": total,
-            "num_solved": solved,
-            "accuracy": solved / total,
-        })
+        results.update(
+            {
+                "num_total": total,
+                "num_solved": solved,
+                "accuracy": solved / total,
+            }
+        )
 
         return results
 
@@ -131,7 +132,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
             data["Correct Answer"],
             data["Incorrect Answer 1"],
             data["Incorrect Answer 2"],
-            data["Incorrect Answer 3"]
+            data["Incorrect Answer 3"],
         ]
         random.shuffle(answers)
 
@@ -140,8 +141,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
 
         multiple_choice_string = ", ".join(f"{letter}) {options_to_answers[letter]}" for letter in options)
         correct_answer_letter = next(
-            letter for letter, answer in options_to_answers.items() 
-            if answer == data["Correct Answer"]
+            letter for letter, answer in options_to_answers.items() if answer == data["Correct Answer"]
         )
 
         return multiple_choice_string, correct_answer_letter

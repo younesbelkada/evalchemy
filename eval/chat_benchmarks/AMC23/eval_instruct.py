@@ -60,14 +60,17 @@ class AMC23Benchmark(BaseBenchmark):
         all_instances = []
         for idx, example in enumerate(examples):
             messages = [
-                {"role": "system", "content": "You are a helpful and harmless assistant. You should think step-by-step."},
-                {"role": "user", "content": PROMPT.format(problem=example["question"])}
-                ]
+                {
+                    "role": "system",
+                    "content": "You are a helpful and harmless assistant. You should think step-by-step.",
+                },
+                {"role": "user", "content": PROMPT.format(problem=example["question"])},
+            ]
             templated_messages = model.apply_chat_template(messages)
 
             generation_args = {
                 "do_sample": False,
-                "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens
+                "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens,
             }
 
             all_instances.append(

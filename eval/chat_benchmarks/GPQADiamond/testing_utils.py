@@ -15,7 +15,7 @@ def get_multiple_choice_answer(pred: str):
     if len(pred) == 0:
         pred = ""
     else:
-      pred = pred[-1]
+        pred = pred[-1]
 
     # Remove the period at the end, again!
     pred = pred.rstrip(".").rstrip("/")

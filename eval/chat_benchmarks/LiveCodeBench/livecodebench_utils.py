@@ -1,4 +1,3 @@
-
 from typing import Optional, Callable, Dict
 import ast
 import copy
@@ -14,7 +13,6 @@ import base64
 import zlib
 import pickle
 import scipy.stats as stats
-
 
 
 def reliability_guard(maximum_memory_bytes: Optional[int] = None):
@@ -100,6 +98,7 @@ def has_test_type(tests, type):  ## helper to select specific type of problems
             return True
     return False
 
+
 def translate_private_test_cases(encoded_data):
     decoded_data = base64.b64decode(encoded_data)
     decompressed_data = zlib.decompress(decoded_data)
@@ -115,7 +114,7 @@ def map_to_example(row):
         "task_id": row["question_id"],
         "is_stdin": has_test_type(row["public_test_cases"], "stdin"),
         "public_test_cases": row["public_test_cases"],
-        "difficulty": row["difficulty"]
+        "difficulty": row["difficulty"],
     }
 
 
@@ -131,9 +130,7 @@ def prepare_test_input_output_std(test_case):
     test_input = test_case["input"]
     test_output = test_case["output"].strip()
     if test_output.endswith("-"):
-        test_output = test_output[
-            : test_output.rfind("-")
-        ].rstrip()  # Remove '-' if present and trailing
+        test_output = test_output[: test_output.rfind("-")].rstrip()  # Remove '-' if present and trailing
     return test_input, test_output
 
 
@@ -141,10 +138,10 @@ def run_test_func(completion, is_extracted, test_input, test_output):
     namespace = {}
     exec(completion, namespace)
     func_name = completion.split("(")[0].split()[-1]
-    
+
     output = io.StringIO()
     sys.stdout = output
-    
+
     try:
         if not is_extracted:
             if isinstance(test_input, dict):
@@ -153,19 +150,19 @@ def run_test_func(completion, is_extracted, test_input, test_output):
                 result_output = namespace[func_name](test_input)
         else:
             result_output = namespace[func_name](*test_input)
-            
+
         if result_output != test_output:
             return False, result_output
-            
+
         return True, result_output
-        
+
     except Exception as e:
         error_msg = f"Error: {str(e)}" if not is_extracted else str(e)
         return False, error_msg
-        
+
     finally:
         sys.stdout = sys.__stdout__
-    
+
 
 def run_test_std(completion, test_input, test_output):
     with io.StringIO() as output:
@@ -247,7 +244,9 @@ def run_tests_for_one_example(test_cases, completion, result_list, is_extracted)
                 passed, output_value = run_test_std(completion, copy.deepcopy(test_input), copy.deepcopy(test_output))
             time_elapsed = time.time() - time_start
             if not passed:
-                output_error = f"For test input: {test_input}. Expected output is: {test_output}, but got: {output_value}."
+                output_error = (
+                    f"For test input: {test_input}. Expected output is: {test_output}, but got: {output_value}."
+                )
 
         except Exception as e:
             passed = False
@@ -266,11 +265,11 @@ def lcb_run(problem, completion, timeout, is_extracted):
     result = manager.list()
     p = multiprocessing.Process(target=run_tests_for_one_example, args=(test_cases, completion, result, is_extracted))
     p.start()
-    p.join(timeout = (timeout+1) * len(test_cases) + 5)
+    p.join(timeout=(timeout + 1) * len(test_cases) + 5)
     if p.is_alive():
         p.kill()
-    
+
     # if len(result) < len(test_cases): failed due to timeout
     for i in range(len(test_cases) - len(result)):
-        result.append((False, f"Time out!.", "Error: Time out!", float("inf")))            
+        result.append((False, f"Time out!.", "Error: Time out!", float("inf")))
     return result

@@ -16,7 +16,7 @@ from lm_eval.models.vllm_causallms import VLLM
 PROMPT = """Problem: {problem}\nMark your solution with \\boxed\nAnswer:"""
 
 
-class AIME24Benchmark(BaseBenchmark):
+class MATH500Benchmark(BaseBenchmark):
     """
     MATH500 Benchmark for evaluating the math reasoning of LLMs.
     Link: https://huggingface.co/datasets/HuggingFaceH4/MATH-500

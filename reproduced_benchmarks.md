@@ -69,3 +69,7 @@
 |             |         |                                         | complete (pass@1)             | 41.9        | 40.5             |                                     |
 |             |         | Qwen/Qwen2.5-7B-Instruct                | instruct (pass@1)             | 35.2        | 37.6             |                                     |
 |             |         |                                         | complete (pass@1)             | 46.7        | 46.1             |                                     |
+| CRUXEval| Marianna| Qwen/Qwen2.5-Coder-7B-Instruct              | Input-CoT (pass@1)             | 66.2       | 65.8         |  [Qwen2.5-Coder Technical Report](https://arxiv.org/pdf/2409.12186) (Table 18)                                     |
+| CRUXEval| |               | Output-CoT (pass@1)             | 66.7      | 65.9         |                                     |
+| CRUXEval| | Qwen/Qwen2.5-Coder-3B-Instruct              | Input-CoT (pass@1)             | 53.4      | 53.2          |                                    |
+| CRUXEval| |               | Output-CoT (pass@1)             | 53.3      | 56.0         |                                     |

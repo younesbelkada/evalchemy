@@ -9,6 +9,7 @@ from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string,
 from eval.task import BaseBenchmark
 
 from lm_eval.models.vllm_causallms import VLLM
+from eval.utils import SYSTEM_PROMPT
 
 # Modified version of hendrycks_math with additional instruction to mark the solution with \\boxed
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
@@ -54,15 +55,13 @@ class AIME24Benchmark(BaseBenchmark):
             or None for non-primary ranks
         """
         examples = self.load_questions()
-
         # Prepare instances for model
         all_instances = []
+        model_name = model.model_args["model"]
+        system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful and harmless assistant. You should think step-by-step.",
-                },
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])},
             ]
             templated_messages = model.apply_chat_template(messages)

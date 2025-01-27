@@ -8,6 +8,7 @@ from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string,
 
 from eval.task import BaseBenchmark
 
+import lm_eval.models
 from lm_eval.models.vllm_causallms import VLLM
 from eval.utils import SYSTEM_PROMPT
 
@@ -57,7 +58,10 @@ class AIME24Benchmark(BaseBenchmark):
         examples = self.load_questions()
         # Prepare instances for model
         all_instances = []
-        model_name = model.model_args["model"]
+        if isinstance(lm, lm_eval.models.huggingface.HFLM):
+            model_name = model.pretrained
+        else:
+            model_name = model.model_args["model"]
         system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [

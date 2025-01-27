@@ -15,6 +15,7 @@ import copy
 from .livecodebench_utils import lcb_run, map_to_example, has_test_type, post_process_code, translate_private_test_cases
 
 from eval.task import BaseBenchmark
+from eval.utils import SYSTEM_PROMPT
 from datasets import load_dataset
 
 from lm_eval.models.vllm_causallms import VLLM
@@ -72,8 +73,9 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
+        model_name = model.model_args['model']
+        system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
-
             if example["is_stdin"]:
                 prompt_text = (
                     "Generate an executable Python function generated from the given prompt. The function should take stdin as input and print the output. Simply call the function after the definition."
@@ -84,15 +86,10 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
                     "Generate an executable Python function generated from the given prompt. Return the function body without invoking it at the final solution."
                     + example["prompt"]
                 )
-
             messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful and harmless assistant. You should think step-by-step.",
-                },
-                {"role": "user", "content": prompt_text},
-            ]
-
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt_text}
+                ]
             templated_messages = model.apply_chat_template(messages)
 
             generation_args = {

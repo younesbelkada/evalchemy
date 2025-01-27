@@ -7,6 +7,7 @@ from datasets import load_dataset
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
 from eval.task import BaseBenchmark
+from eval.utils import SYSTEM_PROMPT
 
 from .testing_utils import get_multiple_choice_answer
 
@@ -57,16 +58,19 @@ class GPQADiamondBenchmark(BaseBenchmark):
         # Prepare instances for model
         all_instances = []
 
+        model_name = model.model_args['model']
+        system_prompt = SYSTEM_PROMPT[model_name]
+
         for idx, example in enumerate(examples):
             multiple_choice_string, correct_answer = self.generate_multiple_choice_answers(example)
             example["answer"] = correct_answer
 
             messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful and harmless assistant. You should think step-by-step.",
-                },
-                {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": PROMPT.format(
+                    problem=example["Question"],
+                    options=multiple_choice_string
+                )}
             ]
             templated_messages = model.apply_chat_template(messages)
 

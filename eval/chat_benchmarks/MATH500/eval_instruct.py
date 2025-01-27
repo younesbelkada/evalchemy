@@ -7,14 +7,31 @@ from lm_eval.api.model import LM
 from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string, remove_boxed
 
 from eval.task import BaseBenchmark
-
+from eval.utils import SYSTEM_PROMPT
 from lm_eval.models.vllm_causallms import VLLM
-
 
 # Modified version of hendrycks_math with additional instruction to mark the solution with \\boxed
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
 PROMPT = """Problem: {problem}\nMark your solution with \\boxed\nAnswer:"""
-
+system_prompt = system_prompt = "Your role as an assistant involves thoroughly exploring questions through a systematic long \
+        thinking process before providing the final precise and accurate solutions. This requires \
+        engaging in a comprehensive cycle of analysis, summarizing, exploration, reassessment, reflection, \
+        backtracing, and iteration to develop well-considered thinking process. \
+        Please structure your response into two main sections: Thought and Solution. \
+        In the Thought section, detail your reasoning process using the specified format: \
+        <|begin_of_thought|> {thought with steps separated with '\n\n'} \
+        <|end_of_thought|> \
+        Each step should include detailed considerations such as analisying questions, summarizing \
+        relevant findings, brainstorming new ideas, verifying the accuracy of the current steps, refining \
+        any errors, and revisiting previous steps. \
+        In the Solution section, based on various attempts, explorations, and reflections from the Thought \
+        section, systematically present the final solution that you deem correct. The solution should \
+        remain a logical, accurate, concise expression style and detail necessary step needed to reach the \
+        conclusion, formatted as follows: \
+        <|begin_of_solution|> \
+        {final formatted, precise, and clear solution} \
+        <|end_of_solution|> \
+        Now, try to solve the following question through the above guidelines:"
 
 class MATH500Benchmark(BaseBenchmark):
     """
@@ -58,14 +75,13 @@ class MATH500Benchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
+        model_name = model.model_args['model']
+        system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful and harmless assistant. You should think step-by-step.",
-                },
-                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
-            ]
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": PROMPT.format(problem=example["problem"])}
+                ]
             templated_messages = model.apply_chat_template(messages)
 
             generation_args = {

@@ -59,7 +59,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         # Prepare instances for model
         all_instances = []
 
-        if isinstance(lm, lm_eval.models.huggingface.HFLM):
+        if isinstance(model, lm_eval.models.huggingface.HFLM):
             model_name = model.pretrained
         else:
             model_name = model.model_args["model"]

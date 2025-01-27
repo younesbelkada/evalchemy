@@ -11,6 +11,7 @@ from eval.utils import SYSTEM_PROMPT
 
 from .testing_utils import get_multiple_choice_answer
 
+import lm_eval.models
 from lm_eval.models.vllm_causallms import VLLM
 
 
@@ -58,7 +59,10 @@ class GPQADiamondBenchmark(BaseBenchmark):
         # Prepare instances for model
         all_instances = []
 
-        model_name = model.model_args["model"]
+        if isinstance(model, lm_eval.models.huggingface.HFLM):
+            model_name = model.pretrained
+        else:
+            model_name = model.model_args["model"]
         system_prompt = SYSTEM_PROMPT[model_name]
 
         for idx, example in enumerate(examples):

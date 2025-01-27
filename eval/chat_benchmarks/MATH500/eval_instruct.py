@@ -8,6 +8,7 @@ from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string,
 
 from eval.task import BaseBenchmark
 from eval.utils import SYSTEM_PROMPT
+import lm_eval.models
 from lm_eval.models.vllm_causallms import VLLM
 
 # Modified version of hendrycks_math with additional instruction to mark the solution with \\boxed
@@ -57,7 +58,10 @@ class MATH500Benchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
-        model_name = model.model_args["model"]
+        if isinstance(model, lm_eval.models.huggingface.HFLM):
+            model_name = model.pretrained
+        else:
+            model_name = model.model_args["model"]
         system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [

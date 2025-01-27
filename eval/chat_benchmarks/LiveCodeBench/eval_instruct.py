@@ -73,7 +73,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
-        model_name = model.model_args['model']
+        model_name = model.model_args["model"]
         system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             if example["is_stdin"]:
@@ -86,10 +86,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
                     "Generate an executable Python function generated from the given prompt. Return the function body without invoking it at the final solution."
                     + example["prompt"]
                 )
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt_text}
-                ]
+            messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt_text}]
             templated_messages = model.apply_chat_template(messages)
 
             generation_args = {

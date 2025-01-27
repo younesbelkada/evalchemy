@@ -14,6 +14,7 @@ from lm_eval.models.vllm_causallms import VLLM
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
 PROMPT = """Problem: {problem}\nMark your solution with \\boxed\nAnswer:"""
 
+
 class MATH500Benchmark(BaseBenchmark):
     """
     MATH500 Benchmark for evaluating the math reasoning of LLMs.
@@ -56,13 +57,13 @@ class MATH500Benchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
-        model_name = model.model_args['model']
+        model_name = model.model_args["model"]
         system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": PROMPT.format(problem=example["problem"])}
-                ]
+                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+            ]
             templated_messages = model.apply_chat_template(messages)
 
             generation_args = {

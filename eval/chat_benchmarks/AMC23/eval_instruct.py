@@ -58,14 +58,11 @@ class AMC23Benchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
-        model_name = model.model_args['model']
+        model_name = model.model_args["model"]
         system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": PROMPT.format(problem=example["question"])},
             ]
             templated_messages = model.apply_chat_template(messages)

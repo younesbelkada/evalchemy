@@ -73,7 +73,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
 
             messages = [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+                {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
             ]
 
             generation_args = {
@@ -89,7 +89,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
                     generation_args["temperature"] = 1
                     messages = [
                         {"role": "user", "content": system_prompt},
-                        {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+                        {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
                     ]
                 else:
                     generation_args["max_tokens"] = 4096

@@ -71,7 +71,7 @@ class AMC23Benchmark(BaseBenchmark):
         for idx, example in enumerate(examples):
             messages = [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+                {"role": "user", "content": PROMPT.format(problem=example["question"])},
             ]
 
             generation_args = {
@@ -87,7 +87,7 @@ class AMC23Benchmark(BaseBenchmark):
                     generation_args["temperature"] = 1
                     messages = [
                         {"role": "user", "content": system_prompt},
-                        {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+                        {"role": "user", "content": PROMPT.format(problem=example["question"])},
                     ]
                 else:
                     generation_args["max_tokens"] = 4096

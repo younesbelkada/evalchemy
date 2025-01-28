@@ -73,6 +73,7 @@ class AIME24Benchmark(BaseBenchmark):
             generation_args = {
                 "do_sample": False,
                 "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens,
+                "temperature": 0.7,
             }
 
             all_instances.append(

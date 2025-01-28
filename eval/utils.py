@@ -126,7 +126,7 @@ conclusion, formatted as follows: \
 {final formatted, precise, and clear solution} \
 <|end_of_solution|> \
 Now, try to solve the following question through the above guidelines:",
-    "open-thoughts/open-thinker-7B": "Your role as an assistant involves thoroughly exploring questions through a systematic long \
+    "open-thoughts/OpenThinker-7B": "Your role as an assistant involves thoroughly exploring questions through a systematic long \
 thinking process before providing the final precise and accurate solutions. This requires \
 engaging in a comprehensive cycle of analysis, summarizing, exploration, reassessment, reflection, \
 backtracing, and iteration to develop well-considered thinking process. \
@@ -214,6 +214,6 @@ MODEL_TO_NAME = {
     "mlfoundations-dev/Bespoke-Stratos-17k-v2": "Bespoke-Stratos-17k-v2",
     "mlfoundations-dev/DCFT-Stratos-Verified-114k-7B-4gpus": "DCFT-Stratos-Verified-114k-7B-4gpus",
     "mlfoundations-dev/Bespoke-Stratos-35k-32b": "DCFT-Bespoke-Stratos-35k-32b",
-    "open-thoughts/open-thinker-7B": "open-thinker-7B",
+    "open-thoughts/OpenThinker-7B": "OpenThinker-7B",
     "bespokelabs/Bespoke-Stratos-7B": "Bespoke-Stratos-7B",
 }

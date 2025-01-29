@@ -1,5 +1,3 @@
-
-
 from typing import Optional
 
 
@@ -28,7 +26,7 @@ def last_boxed_only_string(string: str) -> Optional[str]:
     if right_brace_idx is None:
         retval = None
     else:
-        retval = string[idx : right_brace_idx + 1].replace("$", "").replace("fbox","boxed")
+        retval = string[idx : right_brace_idx + 1].replace("$", "").replace("fbox", "boxed")
 
     return retval
 

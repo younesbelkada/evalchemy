@@ -26,9 +26,7 @@ def csv_to_jsonl(input_csv, output_jsonl):
                         "choices": [
                             {
                                 "index": 0,
-                                "turns": [
-                                    "```python\n" + output + "\n```"
-                                ],
+                                "turns": ["```python\n" + output + "\n```"],
                             }
                         ],
                         "tstamp": time.time(),

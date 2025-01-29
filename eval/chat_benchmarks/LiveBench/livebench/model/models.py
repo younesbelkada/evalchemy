@@ -43,95 +43,71 @@ class Model:
 @dataclass(kw_only=True, frozen=True)
 class AnthropicModel(Model):
     adapter: BaseModelAdapter = field(default=ClaudeAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_anthropic
-    )
+    api_function: model_api_function = field(default=chat_completion_anthropic)
 
 
 @dataclass(kw_only=True, frozen=True)
 class OpenAIModel(Model):
     adapter: BaseModelAdapter = field(default=ChatGPTAdapter())
     inference_api: bool = False
-    api_function: model_api_function = field(
-        default=chat_completion_openai
-    )
+    api_function: model_api_function = field(default=chat_completion_openai)
 
 
 @dataclass(kw_only=True, frozen=True)
 class LlamaModel(Model):
     adapter: BaseModelAdapter = field(default=Llama3Adapter())
-    api_function: model_api_function = field(
-        default=chat_completion_together
-    )
+    api_function: model_api_function = field(default=chat_completion_together)
 
 
 @dataclass(kw_only=True, frozen=True)
 class QwenModel(Model):
     adapter: BaseModelAdapter = field(default=QwenChatAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_together
-    )
+    api_function: model_api_function = field(default=chat_completion_together)
 
 
 @dataclass(kw_only=True, frozen=True)
 class GemmaModel(Model):
     adapter: BaseModelAdapter = field(default=GemmaAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_together
-    )
+    api_function: model_api_function = field(default=chat_completion_together)
 
 
 @dataclass(kw_only=True, frozen=True)
 class GeminiModel(Model):
     adapter: BaseModelAdapter = field(default=GeminiAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_google_generativeai
-    )
+    api_function: model_api_function = field(default=chat_completion_google_generativeai)
 
 
 @dataclass(kw_only=True, frozen=True)
 class MistralModel(Model):
     adapter: BaseModelAdapter = field(default=MistralAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_mistral
-    )
+    api_function: model_api_function = field(default=chat_completion_mistral)
 
 
 @dataclass(kw_only=True, frozen=True)
 class CohereModel(Model):
     adapter: BaseModelAdapter = field(default=CohereAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_cohere
-    )
+    api_function: model_api_function = field(default=chat_completion_cohere)
 
 
 @dataclass(kw_only=True, frozen=True)
 class DeepseekModel(Model):
     adapter: BaseModelAdapter = field(default=DeepseekChatAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_deepseek
-    )
+    api_function: model_api_function = field(default=chat_completion_deepseek)
 
 
 @dataclass(kw_only=True, frozen=True)
 class NvidiaModel(Model):
     adapter: BaseModelAdapter = field(default=NvidiaChatAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_nvidia
-    )
+    api_function: model_api_function = field(default=chat_completion_nvidia)
 
 
 @dataclass(kw_only=True, frozen=True)
 class XAIModel(Model):
     adapter: BaseModelAdapter = field(default=ChatGPTAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_xai
-    )
+    api_function: model_api_function = field(default=chat_completion_xai)
 
 
 @dataclass(kw_only=True, frozen=True)
 class AWSModel(Model):
     adapter: BaseModelAdapter = field(default=ChatGPTAdapter())
-    api_function: model_api_function = field(
-        default=chat_completion_aws
-    )
+    api_function: model_api_function = field(default=chat_completion_aws)

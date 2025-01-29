@@ -1,15 +1,14 @@
-
 import re
 
 
 def house_traversal_process_results(ground_truth: str, llm_answer: str, debug=False) -> int:
     # pull out words in bold
-    bold_words = re.findall(r'(\*{2,})(.*?)\1', llm_answer.lower())
+    bold_words = re.findall(r"(\*{2,})(.*?)\1", llm_answer.lower())
     if not len(bold_words):
         if debug:
-            print('INCORRECT')
-            print('GROUND TRUTH', ground_truth)
-            print('SOLUTION', llm_answer)
+            print("INCORRECT")
+            print("GROUND TRUTH", ground_truth)
+            print("SOLUTION", llm_answer)
         return 0
 
     last_bold = bold_words[-1][1]
@@ -17,7 +16,7 @@ def house_traversal_process_results(ground_truth: str, llm_answer: str, debug=Fa
 
     # check if all the ground truth names are in the last few bolded words, in order
     if len(bold_words) >= len(ground_truth_names):
-        if all([name in bold_words[-1 - i] for i,name in enumerate(ground_truth_names[::-1])]):
+        if all([name in bold_words[-1 - i] for i, name in enumerate(ground_truth_names[::-1])]):
             return 1
 
     score = 1
@@ -35,7 +34,7 @@ def house_traversal_process_results(ground_truth: str, llm_answer: str, debug=Fa
             last_index = index
 
     if debug and score == 0:
-        print('INCORRECT', score)
-        print('GROUND TRUTH', ground_truth)
-        print('SOLUTION', llm_answer)
+        print("INCORRECT", score)
+        print("GROUND TRUTH", ground_truth)
+        print("SOLUTION", llm_answer)
     return score

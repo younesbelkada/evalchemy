@@ -17,19 +17,15 @@ def levenshtein_distance(A, B):
     for i in range(1, N + 1):
         for j in range(1, M + 1):
             if A[i - 1] == B[j - 1]:
-                dp[i][j] = dp[i-1][j-1]
+                dp[i][j] = dp[i - 1][j - 1]
             else:
-                dp[i][j] = 1 + min(
-                    dp[i-1][j],  # Insertion
-                    dp[i][j-1],  # Deletion
-                    dp[i-1][j-1]  # Replacement
-                )
+                dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])  # Insertion  # Deletion  # Replacement
 
     return dp[N][M]
 
 
 def extract_plot_summary(text: str) -> str:
-    pattern = r'<PLOT_SUMMARY>(.*)'
+    pattern = r"<PLOT_SUMMARY>(.*)"
     match = re.search(pattern, text, re.DOTALL)  # re.DOTALL allows . to match newline characters
     return match.group(1) if match else text
 
@@ -38,8 +34,12 @@ def plot_unscrambling_process_results(ground_truth: str, llm_answer: str, debug=
     # Split the ground truth and answer into sentences based on full stops
     llm_answer = extract_plot_summary(llm_answer)
 
-    gt_sentences = [s.strip() for s in ground_truth.split('.')]
-    ans_sentences = [s.strip() for s in llm_answer.split('.') if s.strip() != '</PLOT_SUMMARY>' and s.strip() != '**End of Plot Summary**']
+    gt_sentences = [s.strip() for s in ground_truth.split(".")]
+    ans_sentences = [
+        s.strip()
+        for s in llm_answer.split(".")
+        if s.strip() != "</PLOT_SUMMARY>" and s.strip() != "**End of Plot Summary**"
+    ]
 
     # Remove empty sentences resulting from trailing or double full stops.
     gt_sentences = [s for s in gt_sentences if s]
@@ -56,8 +56,8 @@ def plot_unscrambling_process_results(ground_truth: str, llm_answer: str, debug=
     score = 1 - (raw_distance / n_sentences_gt)
 
     if debug and score < 1:
-        print('INCORRECT', score)
-        print('GROUND TRUTH', gt_sentences)
-        print('SOLUTION', ans_sentences)
-        print('END OF OUTPUT', llm_answer[-50:])
+        print("INCORRECT", score)
+        print("GROUND TRUTH", gt_sentences)
+        print("SOLUTION", ans_sentences)
+        print("END OF OUTPUT", llm_answer[-50:])
     return score

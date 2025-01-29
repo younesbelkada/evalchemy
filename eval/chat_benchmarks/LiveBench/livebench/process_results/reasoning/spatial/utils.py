@@ -1,23 +1,41 @@
 import re
 from livebench.process_results.util import last_boxed_only_string, remove_boxed
 
+
 def spatial_process_results(ground_truth: str, llm_answer: str, debug=False) -> int:
 
     word_to_number = {
-        'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
-        'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10',
-        'eleven': '11', 'twelve': '12', 'thirteen': '13', 'fourteen': '14', 'fifteen': '15',
-        'sixteen': '16', 'seventeen': '17', 'eighteen': '18', 'nineteen': '19', 'twenty': '20'
+        "zero": "0",
+        "one": "1",
+        "two": "2",
+        "three": "3",
+        "four": "4",
+        "five": "5",
+        "six": "6",
+        "seven": "7",
+        "eight": "8",
+        "nine": "9",
+        "ten": "10",
+        "eleven": "11",
+        "twelve": "12",
+        "thirteen": "13",
+        "fourteen": "14",
+        "fifteen": "15",
+        "sixteen": "16",
+        "seventeen": "17",
+        "eighteen": "18",
+        "nineteen": "19",
+        "twenty": "20",
     }
 
-    bold_words = re.findall(r'\*\*([^\*]+)\*\*', llm_answer)
+    bold_words = re.findall(r"\*\*([^\*]+)\*\*", llm_answer)
     score = 0
 
     # allow the answer to be within the last 3 bolded words
     words_to_check = []
     for i in range(3):
         if bold_words and len(bold_words) > i:
-            words_to_check.append(bold_words[-i-1].strip().lower())
+            words_to_check.append(bold_words[-i - 1].strip().lower())
 
     for i, word in enumerate(words_to_check):
         if word == ground_truth.strip().lower():
@@ -53,6 +71,6 @@ def spatial_process_results(ground_truth: str, llm_answer: str, debug=False) -> 
         if last_boxed:
             print("LAST BOXED", last_boxed)
             print("PARSED ANSWER", parsed_answer)
-        print("END OF OUTPUT", llm_answer[-50:])        
+        print("END OF OUTPUT", llm_answer[-50:])
 
     return score

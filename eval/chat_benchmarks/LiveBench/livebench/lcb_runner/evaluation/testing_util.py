@@ -149,11 +149,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                 if isinstance(last_block, ast.If):
                     condition = last_block.test
                     if ast.unparse(condition).strip() == "__name__ == '__main__'":
-                        test = (
-                            ast.unparse(astree.body[:-1])
-                            + "\n"
-                            + ast.unparse(last_block.body)
-                        )
+                        test = ast.unparse(astree.body[:-1]) + "\n" + ast.unparse(last_block.body)
             except:
                 pass
 
@@ -226,10 +222,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
 
                 truncate_line_size = 300 // (raw_inputs.count("\n") + 1)
                 raw_inputs = "\n".join(
-                    [
-                        truncatefn(line, truncate_line_size)
-                        for line in raw_inputs.strip().split("\n")
-                    ]
+                    [truncatefn(line, truncate_line_size) for line in raw_inputs.strip().split("\n")]
                 )
                 raw_outputs = truncatefn(raw_outputs, 200)
             else:
@@ -243,16 +236,12 @@ def run_test(sample, test=None, debug=False, timeout=6):
                 True
             try:
                 if isinstance(in_outs["outputs"][index], dict):
-                    in_outs["outputs"][index] = [
-                        {int(k): v for k, v in in_outs["outputs"][index].items()}
-                    ]
+                    in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index].items()}]
             except:
                 True
             try:
                 if isinstance(in_outs["outputs"][index][0], dict):
-                    in_outs["outputs"][index] = [
-                        {int(k): v for k, v in in_outs["outputs"][index][0].items()}
-                    ]
+                    in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index][0].items()}]
             except:
                 True
 
@@ -275,21 +264,13 @@ def run_test(sample, test=None, debug=False, timeout=6):
                         output = list(output)
 
                     tmp_result = output == in_outs["outputs"][index]
-                    if (
-                        isinstance(in_outs["outputs"][index], list)
-                        and in_outs["outputs"][index]
-                    ):
-                        tmp_result = tmp_result or (
-                            output == in_outs["outputs"][index][0]
-                        )
+                    if isinstance(in_outs["outputs"][index], list) and in_outs["outputs"][index]:
+                        tmp_result = tmp_result or (output == in_outs["outputs"][index][0])
 
                     # ground truth sequences are not tuples
                     try:
                         if isinstance(output[0], tuple):
-                            tmp_result = tmp_result or (
-                                [list(x) for x in output]
-                                == in_outs["outputs"][index][0]
-                            )
+                            tmp_result = tmp_result or ([list(x) for x in output] == in_outs["outputs"][index][0])
                     except:
                         True
                     results.append(tmp_result)
@@ -307,9 +288,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                     signal.alarm(0)
                     faulthandler.disable()
                     if debug:
-                        print(
-                            f"Standard input runtime error or time limit exceeded error = {e}"
-                        )
+                        print(f"Standard input runtime error or time limit exceeded error = {e}")
                     results.append(-1)
                     if "timeoutexception" in repr(e).lower():
                         return results, {
@@ -352,9 +331,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                     except Exception as e:
                         # runtime error or took too long
                         signal.alarm(0)
-                        print(
-                            f"Call-based runtime error or time limit exceeded error = {repr(e)}{e}"
-                        )
+                        print(f"Call-based runtime error or time limit exceeded error = {repr(e)}{e}")
                         results.append(-1)
                         if "timeoutexception" in repr(e).lower():
                             return results, {
@@ -390,9 +367,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                     continue
 
                 if passed and debug:
-                    print(
-                        f"==> output = {output}, test outputs = {in_outs['outputs'][index]}"
-                    )
+                    print(f"==> output = {output}, test outputs = {in_outs['outputs'][index]}")
 
                 if custom_compare_(output, in_outs["outputs"][index]):
                     tmp_result = True
@@ -409,9 +384,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                     if isinstance(in_outs["outputs"][index], list):
                         tmp_result = tmp_result or (output == in_outs["outputs"][index])
                         if isinstance(output[0], str):
-                            tmp_result = tmp_result or (
-                                [e.strip() for e in output] == in_outs["outputs"][index]
-                            )
+                            tmp_result = tmp_result or ([e.strip() for e in output] == in_outs["outputs"][index])
                 except Exception as e:
                     if debug:
                         print(f"Failed check1 exception = {e}")
@@ -430,12 +403,8 @@ def run_test(sample, test=None, debug=False, timeout=6):
                         ]
                 else:
                     in_outs["outputs"][index] = in_outs["outputs"][index].split("\n")
-                    in_outs["outputs"][index] = list(
-                        filter(len, in_outs["outputs"][index])
-                    )
-                    in_outs["outputs"][index] = list(
-                        map(lambda x: x.strip(), in_outs["outputs"][index])
-                    )
+                    in_outs["outputs"][index] = list(filter(len, in_outs["outputs"][index]))
+                    in_outs["outputs"][index] = list(map(lambda x: x.strip(), in_outs["outputs"][index]))
 
                 try:
                     tmp_result = output == [in_outs["outputs"][index]]
@@ -500,8 +469,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                         output_float = [float(e) for e in output]
                         gt_float = [float(e) for e in in_outs["outputs"][index]]
                         tmp_result = tmp_result or (
-                            (len(output_float) == len(gt_float))
-                            and np.allclose(output_float, gt_float)
+                            (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float)
                         )
                 except Exception as e:
                     pass
@@ -519,8 +487,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                             output_float = [float(e) for e in output[0]]
                             gt_float = [float(e) for e in in_outs["outputs"][index][0]]
                             tmp_result = tmp_result or (
-                                (len(output_float) == len(gt_float))
-                                and np.allclose(output_float, gt_float)
+                                (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float)
                             )
                 except Exception as e:
                     pass
@@ -690,16 +657,10 @@ def reliability_guard(maximum_memory_bytes=None):
     if maximum_memory_bytes is not None:
         import resource
 
-        resource.setrlimit(
-            resource.RLIMIT_AS, (maximum_memory_bytes, maximum_memory_bytes)
-        )
-        resource.setrlimit(
-            resource.RLIMIT_DATA, (maximum_memory_bytes, maximum_memory_bytes)
-        )
+        resource.setrlimit(resource.RLIMIT_AS, (maximum_memory_bytes, maximum_memory_bytes))
+        resource.setrlimit(resource.RLIMIT_DATA, (maximum_memory_bytes, maximum_memory_bytes))
         if not platform.uname().system == "Darwin":
-            resource.setrlimit(
-                resource.RLIMIT_STACK, (maximum_memory_bytes, maximum_memory_bytes)
-            )
+            resource.setrlimit(resource.RLIMIT_STACK, (maximum_memory_bytes, maximum_memory_bytes))
 
     faulthandler.disable()
 

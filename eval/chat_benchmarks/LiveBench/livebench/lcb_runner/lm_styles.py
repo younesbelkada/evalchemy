@@ -371,9 +371,7 @@ LanguageModelList: list[LanguageModel] = [
     ),
 ]
 
-LanguageModelStore: dict[str, LanguageModel] = {
-    lm.model_name: lm for lm in LanguageModelList
-}
+LanguageModelStore: dict[str, LanguageModel] = {lm.model_name: lm for lm in LanguageModelList}
 
 if __name__ == "__main__":
     print(list(LanguageModelStore.keys()))

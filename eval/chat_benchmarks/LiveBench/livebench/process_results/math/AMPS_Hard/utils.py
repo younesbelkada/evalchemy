@@ -10,6 +10,7 @@ from livebench.process_results.util import last_boxed_only_string, remove_boxed
 
 import warnings
 import traceback
+
 try:
     import sympy
     from sympy.parsing.latex import parse_latex
@@ -27,28 +28,30 @@ except ModuleNotFoundError:
 please install lark via pip install lark",
     )
 
-def run_with_timeout(func, args=(), timeout=8):  
-    def wrapper(queue):  
-        try:  
-            result = func(*args)  
-            queue.put(result)  
-        except Exception as e:  
-            queue.put(e)  
 
-    queue = Queue()  
-    process = Process(target=wrapper, args=(queue,))  
-    process.start()  
-    process.join(timeout)  
+def run_with_timeout(func, args=(), timeout=8):
+    def wrapper(queue):
+        try:
+            result = func(*args)
+            queue.put(result)
+        except Exception as e:
+            queue.put(e)
 
-    if process.is_alive():  
-        process.terminate()  
-        process.join()  
-        raise TimeoutError("Operation timed out")  
+    queue = Queue()
+    process = Process(target=wrapper, args=(queue,))
+    process.start()
+    process.join(timeout)
 
-    result = queue.get()  
-    if isinstance(result, Exception):  
-        raise result  
-    return result 
+    if process.is_alive():
+        process.terminate()
+        process.join()
+        raise TimeoutError("Operation timed out")
+
+    result = queue.get()
+    if isinstance(result, Exception):
+        raise result
+    return result
+
 
 def amps_hard_process_results(ground_truth: str, llm_answer: str, debug=False) -> int:
     retval = 0
@@ -56,7 +59,7 @@ def amps_hard_process_results(ground_truth: str, llm_answer: str, debug=False) -
 
     if isinstance(ground_truth, list):
         ground_truth = ground_truth[-1]
-    llm_answer = llm_answer.replace("+C","")
+    llm_answer = llm_answer.replace("+C", "")
     llm_answer = llm_answer.replace("+ C", "")
     llm_answer = llm_answer.replace("+ c", "")
     llm_answer = llm_answer.replace("+c", "")
@@ -94,18 +97,18 @@ def amps_hard_process_results(ground_truth: str, llm_answer: str, debug=False) -
         except Exception as e:
             warnings.warn(f"Error when comparing ground truth and parsed answer: {e}")
     else:
-        if llm_answer[-1] == '.':
+        if llm_answer[-1] == ".":
             llm_answer = llm_answer[:-1]
-        if ground_truth == llm_answer[-len(ground_truth):]:
-            parsed_answer = llm_answer[-len(ground_truth):]
+        if ground_truth == llm_answer[-len(ground_truth) :]:
+            parsed_answer = llm_answer[-len(ground_truth) :]
             retval = 1
 
     if debug and retval == 0:
-        print('INCORRECT')
-        print('GROUND TRUTH', ground_truth)
+        print("INCORRECT")
+        print("GROUND TRUTH", ground_truth)
         if parsed_answer:
-            print('SOLUTION', parsed_answer)
-        print('END OF OUTPUT', llm_answer[-70:])
+            print("SOLUTION", parsed_answer)
+        print("END OF OUTPUT", llm_answer[-70:])
     return retval
 
 
@@ -125,19 +128,15 @@ def amps_hard_process_results(ground_truth: str, llm_answer: str, debug=False) -
 #     def __exit__(self, type, value, traceback):
 #         signal.alarm(0)
 
+
 def parse(x: str) -> list[sympy.Expr]:
     try:
         # first try to parse normally
-        parsed_xs = parse_latex(x, backend='lark') 
-    except (
-        sympy.parsing.latex.errors.LaTeXParsingError,
-        sympy.SympifyError,
-        TypeError,
-        Exception
-    ):
+        parsed_xs = parse_latex(x, backend="lark")
+    except (sympy.parsing.latex.errors.LaTeXParsingError, sympy.SympifyError, TypeError, Exception):
         try:
             # this almost only happened for amazon.nova-pro-v1:0 where it outputs e.g. \\frac or \\sqrt all the time
-            parsed_xs = parse_latex(x.replace('\\\\', '\\'), backend='lark')
+            parsed_xs = parse_latex(x.replace("\\\\", "\\"), backend="lark")
         except:
             try:
                 # if all else fails, try to parse using default backend
@@ -145,7 +144,7 @@ def parse(x: str) -> list[sympy.Expr]:
             except:
                 warnings.warn(f"couldn't parse {x}")
                 return []
-    
+
     if isinstance(parsed_xs, lark.Tree):
         # lark backend returns multiple options if there is ambiguity
         parsed_xs = parsed_xs.children
@@ -186,9 +185,7 @@ def is_equiv(x1: str, x2: str) -> bool:
                     if sympy.Abs(sympy.simplify(diff)) < 0.001:
                         return True
                 except Exception as e:
-                    errors.append(
-                        f"Had some trouble simplifying when comparing {x1} and {x2}: {e}"
-                    )
+                    errors.append(f"Had some trouble simplifying when comparing {x1} and {x2}: {e}")
         for error in errors:
             warnings.warn(error)
         return False

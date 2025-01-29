@@ -115,9 +115,7 @@ class LiveBenchBenchmark(BaseBenchmark):
                 )
 
             for question_file in list_of_question_files:
-                questions = load_questions_jsonl(
-                    question_file, self.all_release_dates, self.release_date
-                )
+                questions = load_questions_jsonl(question_file, self.all_release_dates, self.release_date)
                 if self.debug:
                     questions = questions[:10]
 
@@ -210,7 +208,7 @@ class LiveBenchBenchmark(BaseBenchmark):
                     for idx, output in enumerate(outputs):
                         # Match gen_model_answer.py output cleaning
                         output = output.strip()
-                        
+
                         # Handle stop strings like in gen_model_answer.py
                         if all_convs[idx].stop_str and isinstance(all_convs[idx].stop_str, list):
                             stop_str_indices = sorted(
@@ -226,18 +224,18 @@ class LiveBenchBenchmark(BaseBenchmark):
                             output = output[: output.find(all_convs[idx].stop_str)]
 
                         # Handle special tokens like in gen_model_answer.py
-                        if hasattr(model, 'tokenizer'):
+                        if hasattr(model, "tokenizer"):
                             for special_token in model.tokenizer.special_tokens_map.values():
                                 if isinstance(special_token, list):
                                     for special_tok in special_token:
                                         output = output.replace(special_tok, "")
                                 else:
                                     output = output.replace(special_token, "")
-                        
+
                         # Handle xgen specific case like in gen_model_answer.py
                         if all_convs[idx].name == "xgen" and output.startswith("Assistant:"):
                             output = output.replace("Assistant:", "", 1).strip()
-                            
+
                         output = output.strip()
                         all_convs[idx].update_last_message(output)
             for idx, (_, answer_file) in enumerate(questions):
@@ -252,16 +250,13 @@ class LiveBenchBenchmark(BaseBenchmark):
         results = []
         for idx, (question, answer_file) in enumerate(questions):
             os.makedirs(os.path.dirname(answer_file), exist_ok=True)
-            
+
             # Format choices consistently with gen_model_answer.py
             choices = all_choices[answer_file][idx]
             for choice in choices:
                 # Ensure each turn is properly formatted
-                choice["turns"] = [
-                    turn.strip() if isinstance(turn, str) else turn 
-                    for turn in choice["turns"]
-                ]
-            
+                choice["turns"] = [turn.strip() if isinstance(turn, str) else turn for turn in choice["turns"]]
+
             ans_json = {
                 "question_id": question["question_id"],
                 "answer_id": shortuuid.uuid(),
@@ -275,7 +270,6 @@ class LiveBenchBenchmark(BaseBenchmark):
             reorg_answer_file(answer_file)
 
         return results
-
 
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
         """
@@ -292,7 +286,7 @@ class LiveBenchBenchmark(BaseBenchmark):
         question_to_date = {}
         if self.question_source == "huggingface":
             categories, tasks = get_categories_tasks(self.dataset_name)
-        
+
             for category_name, task_names in tasks.items():
                 for task_name in task_names:
                     print(f"Evaluating {category_name} {task_name}")
@@ -323,7 +317,7 @@ class LiveBenchBenchmark(BaseBenchmark):
                             model_list=[model_name],
                             remove_existing_file=self.remove_existing_file,
                             bench_name=task_full_name,
-                            debug=self.debug
+                            debug=self.debug,
                         )
 
                     with open(output_file, "r") as f:
@@ -341,9 +335,7 @@ class LiveBenchBenchmark(BaseBenchmark):
 
             for question_file in list_of_question_files:
                 # First load the questions
-                questions = load_questions_jsonl(
-                    question_file, self.all_release_dates, self.release_date
-                )
+                questions = load_questions_jsonl(question_file, self.all_release_dates, self.release_date)
                 if self.debug:
                     questions = questions[:10]
 

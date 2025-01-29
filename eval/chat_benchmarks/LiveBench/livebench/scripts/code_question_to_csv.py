@@ -31,7 +31,7 @@ def jsonl_to_csv(input_filename, output_filename, task):
 
             # Extract the required fields
             question_id = data.get("question_id", "")
-            citation = data.get("citation", "").split(' ')[0]
+            citation = data.get("citation", "").split(" ")[0]
             turns = data.get("turns", [])
             if "coding_completion" in task:
                 partial_solution = data.get("partial_solution", "")
@@ -50,9 +50,7 @@ def jsonl_to_csv(input_filename, output_filename, task):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print(
-            "Usage: python code_question_to_csv.py <input_filename> <output_filename> <task>"
-        )
+        print("Usage: python code_question_to_csv.py <input_filename> <output_filename> <task>")
         sys.exit(1)
 
     input_filename = sys.argv[1]
@@ -60,4 +58,3 @@ if __name__ == "__main__":
     task = sys.argv[3]
 
     jsonl_to_csv(input_filename, output_filename, task)
-

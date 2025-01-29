@@ -68,10 +68,7 @@ def get_categories_tasks(bench_name: str):
     if len(split_bench_name) == 1:
         # specify entire bench
 
-        categories = {
-            category_name: get_hf_dataset(category_name)
-            for category_name in LIVE_BENCH_CATEGORIES
-        }
+        categories = {category_name: get_hf_dataset(category_name) for category_name in LIVE_BENCH_CATEGORIES}
 
         tasks = {
             category_name: get_tasks_from_hf_category(categories[category_name])
@@ -85,9 +82,7 @@ def get_categories_tasks(bench_name: str):
         categories = {category_name: get_hf_dataset(category_name)}
 
         if len(split_bench_name) == 2:
-            tasks = {
-                category_name: get_tasks_from_hf_category(categories[category_name])
-            }
+            tasks = {category_name: get_tasks_from_hf_category(categories[category_name])}
         else:
             assert len(split_bench_name) == 3
             task_name = split_bench_name[2]
@@ -111,20 +106,14 @@ def load_answers_judgments():
 
     model_judgment = {
         category_name: [
-            example
-            for example in model_judgment_dataset.filter(
-                lambda row: row["category"] == category_name
-            )
+            example for example in model_judgment_dataset.filter(lambda row: row["category"] == category_name)
         ]
         for category_name in LIVE_BENCH_CATEGORIES
     }
 
     model_answer = {
         category_name: [
-            example
-            for example in model_answer_dataset.filter(
-                lambda row: row["category"] == category_name
-            )
+            example for example in model_answer_dataset.filter(lambda row: row["category"] == category_name)
         ]
         for category_name in LIVE_BENCH_CATEGORIES
     }
@@ -151,24 +140,14 @@ def load_questions(
         question_ids: A list of question ids to include. If None, all questions will be included.
     """
     if task_name is not None:
-        questions = [
-            example for example in category.filter(lambda row: row["task"] == task_name)
-        ]
+        questions = [example for example in category.filter(lambda row: row["task"] == task_name)]
     else:
         questions = list(category)
     for q in questions:
-        if "livebench_release_date" in q.keys() and isinstance(
-            q["livebench_release_date"], datetime
-        ):
-            q["livebench_release_date"] = datetime.strftime(
-                q["livebench_release_date"], "%Y-%m-%d"
-            )
-        if "livebench_removal_date" in q.keys() and isinstance(
-            q["livebench_removal_date"], datetime
-        ):
-            q["livebench_removal_date"] = datetime.strftime(
-                q["livebench_removal_date"], "%Y-%m-%d"
-            )
+        if "livebench_release_date" in q.keys() and isinstance(q["livebench_release_date"], datetime):
+            q["livebench_release_date"] = datetime.strftime(q["livebench_release_date"], "%Y-%m-%d")
+        if "livebench_removal_date" in q.keys() and isinstance(q["livebench_removal_date"], datetime):
+            q["livebench_removal_date"] = datetime.strftime(q["livebench_removal_date"], "%Y-%m-%d")
         if "release_date" in q.keys() and isinstance(q["release_date"], datetime):
             q["release_date"] = datetime.strftime(q["release_date"], "%Y-%m-%d")
         if (
@@ -179,16 +158,14 @@ def load_questions(
             q["original_json"]["contest_date"] = datetime.strftime(
                 q["original_json"]["contest_date"], "%Y-%m-%d %H:%M:%S"
             )
-    questions = [
-        q for q in questions if q["livebench_release_date"] in livebench_releases
-    ]
+    questions = [q for q in questions if q["livebench_release_date"] in livebench_releases]
     if livebench_release is not None:
         questions = [
-            q for q in questions if q['livebench_removal_date'] == "" or q['livebench_removal_date'] > livebench_release
+            q for q in questions if q["livebench_removal_date"] == "" or q["livebench_removal_date"] > livebench_release
         ]
 
     if question_ids is not None:
-        questions = [q for q in questions if q['question_id'] in question_ids]
+        questions = [q for q in questions if q["question_id"] in question_ids]
     return questions
 
 
@@ -214,15 +191,13 @@ def load_questions_jsonl(
             if line:
                 questions.append(json.loads(line))
 
-    questions = [
-        q for q in questions if q["livebench_release_date"] in livebench_releases
-    ]
+    questions = [q for q in questions if q["livebench_release_date"] in livebench_releases]
     if livebench_release is not None:
         questions = [
-            q for q in questions if q['livebench_removal_date'] == "" or q['livebench_removal_date'] > livebench_release
+            q for q in questions if q["livebench_removal_date"] == "" or q["livebench_removal_date"] > livebench_release
         ]
     if question_ids is not None:
-        questions = [q for q in questions if q['question_id'] in question_ids]
+        questions = [q for q in questions if q["question_id"] in question_ids]
     return questions
 
 
@@ -341,9 +316,7 @@ def check_data(questions, model_answers, models):
         assert m in model_answers, f"Missing model answer for {m}"
         m_answer = model_answers[m]
         for q in questions:
-            assert (
-                q["question_id"] in m_answer
-            ), f"Missing model {m}'s answer to Question {q['question_id']}"
+            assert q["question_id"] in m_answer, f"Missing model {m}'s answer to Question {q['question_id']}"
 
 
 def get_model_list(answer_dir):

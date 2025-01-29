@@ -35,9 +35,7 @@ def check_correctness(sample, generation, timeout, debug=True):
         args=(sample, generation, debug, result, metadata_list, timeout),
     )
     p.start()
-    p.join(
-        timeout=(timeout + 1) * len(json.loads(sample["input_output"])["inputs"]) + 5
-    )
+    p.join(timeout=(timeout + 1) * len(json.loads(sample["input_output"])["inputs"]) + 5)
     if p.is_alive():
         p.kill()
     if not result:
@@ -60,9 +58,7 @@ def evaluate_generations_by_problem(args):
     for o_idx, o in enumerate(problem_generations):
         curr_res = [-2]
         try:
-            curr_res, curr_metadata = check_correctness(
-                sample, o, timeout=timeout, debug=debug
-            )
+            curr_res, curr_metadata = check_correctness(sample, o, timeout=timeout, debug=debug)
             if debug:
                 print(f"\nSuccessful compilation of task {o_idx}!")
             fixed = []
@@ -124,13 +120,8 @@ def evaluate_generations(
     ]
 
     with tqdm(total=len(inputs)) as pbar:
-        with ProcessPoolExecutor(
-            max_workers=1 if debug else num_process_evaluate
-        ) as executor:
-            futures = {
-                executor.submit(evaluate_generations_by_problem, arg): index
-                for arg, index in inputs
-            }
+        with ProcessPoolExecutor(max_workers=1 if debug else num_process_evaluate) as executor:
+            futures = {executor.submit(evaluate_generations_by_problem, arg): index for arg, index in inputs}
 
             results = {}
             metadata = {}
@@ -139,9 +130,7 @@ def evaluate_generations(
                 results[index], metadata[index] = future.result()
                 pbar.update(1)
 
-    assert len(results) == len(
-        inputs
-    ), f"results = {len(results)} inputs = {len(inputs)} {results=}"
+    assert len(results) == len(inputs), f"results = {len(results)} inputs = {len(inputs)} {results=}"
     # results = {i: r for r, (_, i) in zip(results, inputs)}
 
     return results, metadata
@@ -173,8 +162,6 @@ def codegen_metrics(
         else:
             final_metadata[i] = [json.dumps(x) for x in final_metadata[i]]
 
-        assert len(final_metadata[i]) == len(
-            generations[0]
-        ), f"{len(final_metadata[i])=}"
+        assert len(final_metadata[i]) == len(generations[0]), f"{len(final_metadata[i])=}"
 
     return metrics, results, final_metadata

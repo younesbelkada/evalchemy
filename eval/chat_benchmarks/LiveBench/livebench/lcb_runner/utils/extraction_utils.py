@@ -12,7 +12,7 @@ def extract_code(model_output: str, lmstyle: LMStyle):
     else:
         indexlines = [i for i, line in enumerate(outputlines) if "```" in line]
     if len(indexlines) < 2:
-        if model_output[0] == '`' and model_output[-1] == '`':
+        if model_output[0] == "`" and model_output[-1] == "`":
             return model_output[1:-1]
         return ""
     return "\n".join(outputlines[indexlines[0] + 1 : indexlines[1]])
@@ -28,11 +28,7 @@ def extract_test_output_code(model_output: str, lmstyle: LMStyle = None):
         indexlines = [i for i, line in enumerate(outputlines) if "PYTHON]" in line]
     else:
         # first try to extract ```python if not then try ```
-        indexlines = [
-            i
-            for i, line in enumerate(outputlines)
-            if "```python" in line or "```Python" in line
-        ]
+        indexlines = [i for i, line in enumerate(outputlines) if "```python" in line or "```Python" in line]
         if indexlines:
             start_index = indexlines[0]
         else:

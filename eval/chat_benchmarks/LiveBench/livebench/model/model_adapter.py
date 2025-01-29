@@ -1,6 +1,7 @@
 """Model adapter registration.
 From https://github.com/lm-sys/FastChat/blob/main/fastchat/model/model_adapter.py
 """
+
 import math
 import os
 import re
@@ -32,21 +33,25 @@ from fastchat.modules.gptq import GptqConfig, load_gptq_quantized
 from fastchat.modules.xfastertransformer import XftConfig, load_xft_model
 from fastchat.utils import get_gpu_memory
 from transformers import (
-    AutoConfig, AutoModel, AutoModelForCausalLM, AutoModelForSeq2SeqLM,
-    AutoTokenizer, LlamaForCausalLM, LlamaTokenizer, T5Tokenizer
+    AutoConfig,
+    AutoModel,
+    AutoModelForCausalLM,
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    LlamaForCausalLM,
+    LlamaTokenizer,
+    T5Tokenizer,
 )
 
 from livebench.conversation import Conversation, get_conv_template
 
 
-#from fastchat.model.model_cllm import generate_stream_cllm
+# from fastchat.model.model_cllm import generate_stream_cllm
 
 
 # Check an environment variable to check if we should be sharing Peft model
 # weights.  When false we treat all Peft models as separate.
-peft_share_base_weights = (
-    os.environ.get("PEFT_SHARE_BASE_WEIGHTS", "false").lower() == "true"
-)
+peft_share_base_weights = os.environ.get("PEFT_SHARE_BASE_WEIGHTS", "false").lower() == "true"
 
 ANTHROPIC_MODEL_LIST = (
     "claude-1",
@@ -99,7 +104,7 @@ TOGETHER_MODEL_LIST = (
     "Llama-3.1-Nemotron-70B-Instruct-HF",
     "gemma-2-27b-it",
     "gemma-2-9b-it",
-    "qwq-32b-preview"
+    "qwq-32b-preview",
 )
 TOGETHER_MODEL_LIST = tuple([m.lower() for m in TOGETHER_MODEL_LIST])
 
@@ -119,12 +124,10 @@ GOOGLE_GENERATIVEAI_MODEL_LIST = (
     "gemini-1.5-flash-8b-exp-0924",
     "gemini-exp-1206",
     "gemini-2.0-flash-exp",
-    "learnlm-1.5-pro-experimental"
+    "learnlm-1.5-pro-experimental",
 )
 
-VERTEX_MODEL_LIST = (
-    "gemini-1.5-pro-preview-0409",
-)
+VERTEX_MODEL_LIST = ("gemini-1.5-pro-preview-0409",)
 
 MISTRAL_MODEL_LIST = (
     "mistral-large-latest",
@@ -139,7 +142,7 @@ MISTRAL_MODEL_LIST = (
     "mistral-large-2407",
     "open-mistral-nemo",
     "mistral-large-2411",
-    "mistral-small-2409"
+    "mistral-small-2409",
 )
 
 COHERE_MODEL_LIST = (
@@ -160,9 +163,7 @@ NVIDIA_MODEL_LIST = (
     "llama-3.1-nemotron-70b-instruct",
 )
 
-XAI_MODEL_LIST = (
-    "grok-beta"
-)
+XAI_MODEL_LIST = "grok-beta"
 
 AWS_MODEL_LIST = (
     "amazon.nova-micro-v1:0",
@@ -170,8 +171,9 @@ AWS_MODEL_LIST = (
     "amazon.nova-lite-v1:0",
     "amazon.nova-lite-v1:0:300k",
     "amazon.nova-pro-v1:0",
-    "amazon.nova-pro-v1:0:300k"
+    "amazon.nova-pro-v1:0:300k",
 )
+
 
 class BaseModelAdapter:
     """The base and the default model adapter."""
@@ -262,9 +264,7 @@ def get_model_adapter(model_path: str) -> BaseModelAdapter:
     raise ValueError(f"No valid model adapter for {model_path}")
 
 
-def raise_warning_for_incompatible_cpu_offloading_configuration(
-    device: str, load_8bit: bool, cpu_offloading: bool
-):
+def raise_warning_for_incompatible_cpu_offloading_configuration(device: str, load_8bit: bool, cpu_offloading: bool):
     if cpu_offloading:
         if not load_8bit:
             warnings.warn(
@@ -281,8 +281,7 @@ def raise_warning_for_incompatible_cpu_offloading_configuration(
             return False
         if device != "cuda":
             warnings.warn(
-                "CPU-offloading is only enabled when using CUDA-devices\n"
-                "Continuing without cpu-offloading enabled\n"
+                "CPU-offloading is only enabled when using CUDA-devices\n" "Continuing without cpu-offloading enabled\n"
             )
             return False
     return cpu_offloading
@@ -309,9 +308,7 @@ def load_model(
     # get model adapter
     adapter = get_model_adapter(model_path)
     # Handle device mapping
-    cpu_offloading = raise_warning_for_incompatible_cpu_offloading_configuration(
-        device, load_8bit, cpu_offloading
-    )
+    cpu_offloading = raise_warning_for_incompatible_cpu_offloading_configuration(device, load_8bit, cpu_offloading)
     move_to_device = True
     if device == "cpu":
         kwargs = {"torch_dtype": torch.float32}
@@ -329,14 +326,9 @@ def load_model(
         if num_gpus != 1 or max_gpu_memory:
             kwargs["device_map"] = "auto"
             if max_gpu_memory is None:
-                kwargs[
-                    "device_map"
-                ] = "sequential"  # This is important for not the same VRAM sizes
+                kwargs["device_map"] = "sequential"  # This is important for not the same VRAM sizes
                 available_gpu_memory = get_gpu_memory(num_gpus)
-                kwargs["max_memory"] = {
-                    i: str(int(available_gpu_memory[i] * 0.85)) + "GiB"
-                    for i in range(num_gpus)
-                }
+                kwargs["max_memory"] = {i: str(int(available_gpu_memory[i] * 0.85)) + "GiB" for i in range(num_gpus)}
             else:
                 if num_gpus == 1:
                     move_to_device = False  # The memory cap will trigger offloading.
@@ -360,9 +352,7 @@ def load_model(
         try:
             import intel_extension_for_pytorch as ipex
         except ImportError:
-            warnings.warn(
-                "Intel Extension for PyTorch is not installed, but is required for xpu inference."
-            )
+            warnings.warn("Intel Extension for PyTorch is not installed, but is required for xpu inference.")
     elif device == "npu":
         kwargs = {"torch_dtype": torch.float16}
         # Try to load ipex, while it looks unused, it links into torch for xpu support
@@ -378,18 +368,12 @@ def load_model(
         from transformers import BitsAndBytesConfig
 
         if "max_memory" in kwargs:
-            kwargs["max_memory"]["cpu"] = (
-                str(math.floor(psutil.virtual_memory().available / 2**20)) + "Mib"
-            )
-        kwargs["quantization_config"] = BitsAndBytesConfig(
-            load_in_8bit_fp32_cpu_offload=cpu_offloading
-        )
+            kwargs["max_memory"]["cpu"] = str(math.floor(psutil.virtual_memory().available / 2**20)) + "Mib"
+        kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit_fp32_cpu_offload=cpu_offloading)
         kwargs["load_in_8bit"] = load_8bit
     elif load_8bit:
         if num_gpus != 1:
-            warnings.warn(
-                "8-bit quantization is not supported for multi-gpu inference."
-            )
+            warnings.warn("8-bit quantization is not supported for multi-gpu inference.")
         else:
             model, tokenizer = adapter.load_compress_model(
                 model_path=model_path,
@@ -401,9 +385,7 @@ def load_model(
                 print(model)
             return model, tokenizer
     elif awq_config and awq_config.wbits < 16:
-        assert (
-            awq_config.wbits == 4
-        ), "Currently we only support 4-bit inference for AWQ."
+        assert awq_config.wbits == 4, "Currently we only support 4-bit inference for AWQ."
         model, tokenizer = load_awq_quantized(model_path, awq_config, device)
         if num_gpus != 1:
             device_map = accelerate.infer_auto_device_map(
@@ -417,9 +399,7 @@ def load_model(
                     "DecoderLayer",
                 ],
             )
-            model = accelerate.dispatch_model(
-                model, device_map=device_map, offload_buffers=True
-            )
+            model = accelerate.dispatch_model(model, device_map=device_map, offload_buffers=True)
         else:
             model.to(device)
         return model, tokenizer
@@ -431,9 +411,7 @@ def load_model(
                 max_memory=kwargs["max_memory"],
                 no_split_module_classes=["LlamaDecoderLayer"],
             )
-            model = accelerate.dispatch_model(
-                model, device_map=device_map, offload_buffers=True
-            )
+            model = accelerate.dispatch_model(model, device_map=device_map, offload_buffers=True)
         else:
             model.to(device)
         return model, tokenizer
@@ -457,29 +435,25 @@ def load_model(
             if not os.path.exists(model_path):
                 model_path = snapshot_download(model_id=model_path, revision=revision)
         except ImportError as e:
-            warnings.warn(
-                "Use model from www.modelscope.cn need pip install modelscope"
-            )
+            warnings.warn("Use model from www.modelscope.cn need pip install modelscope")
             raise e
 
     # Load model
     warnings.warn(str(kwargs))
     model, tokenizer = adapter.load_model(model_path, kwargs)
 
-    if (
-        device == "cpu"
-        and kwargs["torch_dtype"] is torch.bfloat16
-        and CPU_ISA is not None
-    ):
+    if device == "cpu" and kwargs["torch_dtype"] is torch.bfloat16 and CPU_ISA is not None:
         model = ipex.optimize(model, dtype=kwargs["torch_dtype"])
 
-    if move_to_device and ((
-        device == "cuda" and num_gpus == 1 and not cpu_offloading
-    ) or device in (
-        "mps",
-        "xpu",
-        "npu",
-    )):
+    if move_to_device and (
+        (device == "cuda" and num_gpus == 1 and not cpu_offloading)
+        or device
+        in (
+            "mps",
+            "xpu",
+            "npu",
+        )
+    ):
         model.to(device)
 
     if device == "xpu":
@@ -620,9 +594,7 @@ def add_model_args(parser):
         help="Override the default dtype. If not set, it will use float16 on GPU and float32 on CPU.",
         default=None,
     )
-    parser.add_argument(
-        "--load-8bit", action="store_true", help="Use 8-bit quantization"
-    )
+    parser.add_argument("--load-8bit", action="store_true", help="Use 8-bit quantization")
     parser.add_argument(
         "--cpu-offloading",
         action="store_true",
@@ -762,22 +734,16 @@ class PeftModelAdapter:
                 model.load_adapter(model_path, adapter_name=model_path)
             else:
                 base_adapter = get_model_adapter(base_model_path)
-                base_model, tokenizer = base_adapter.load_model(
-                    base_model_path, from_pretrained_kwargs
-                )
+                base_model, tokenizer = base_adapter.load_model(base_model_path, from_pretrained_kwargs)
                 # Super important: make sure we use model_path as the
                 # `adapter_name`.
-                model = PeftModel.from_pretrained(
-                    base_model, model_path, adapter_name=model_path
-                )
+                model = PeftModel.from_pretrained(base_model, model_path, adapter_name=model_path)
                 peft_model_cache[base_model_path] = (model, tokenizer)
             return model, tokenizer
 
         # In the normal case, load up the base model weights again.
         base_adapter = get_model_adapter(base_model_path)
-        base_model, tokenizer = base_adapter.load_model(
-            base_model_path, from_pretrained_kwargs
-        )
+        base_model, tokenizer = base_adapter.load_model(base_model_path, from_pretrained_kwargs)
         model = PeftModel.from_pretrained(base_model, model_path)
         return model, tokenizer
 
@@ -805,9 +771,7 @@ class VicunaAdapter(BaseModelAdapter):
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, use_fast=self.use_fast_tokenizer, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=self.use_fast_tokenizer, revision=revision)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             low_cpu_mem_usage=True,
@@ -858,9 +822,7 @@ class AiroborosAdapter(BaseModelAdapter):
             max_seq_len=8192,
             **from_pretrained_kwargs,
         )
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, use_fast=True
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=True)
         return model, tokenizer
 
 
@@ -879,9 +841,7 @@ class LongChatAdapter(BaseModelAdapter):
         config = AutoConfig.from_pretrained(model_path, revision=revision)
         replace_llama_with_condense(config.rope_scaling["factor"])
 
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, use_fast=self.use_fast_tokenizer, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=self.use_fast_tokenizer, revision=revision)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             low_cpu_mem_usage=True,
@@ -897,10 +857,7 @@ class GoogleT5Adapter(BaseModelAdapter):
     """The model adapter for google/Flan based models, such as Salesforce/codet5p-6b, lmsys/fastchat-t5-3b-v1.0, flan-t5-*, flan-ul2"""
 
     def match(self, model_path: str):
-        return any(
-            model_str in model_path.lower()
-            for model_str in ["flan-", "fastchat-t5", "codet5p"]
-        )
+        return any(model_str in model_path.lower() for model_str in ["flan-", "fastchat-t5", "codet5p"])
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
@@ -954,12 +911,8 @@ class ChatGLMAdapter(BaseModelAdapter):
                 revision=revision,
             )
         else:
-            tokenizer = AutoTokenizer.from_pretrained(
-                model_path, trust_remote_code=True, revision=revision
-            )
-        model = AutoModel.from_pretrained(
-            model_path, trust_remote_code=True, **from_pretrained_kwargs
-        )
+            tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
+        model = AutoModel.from_pretrained(model_path, trust_remote_code=True, **from_pretrained_kwargs)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -979,12 +932,8 @@ class CodeGeexAdapter(BaseModelAdapter):
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
-        model = AutoModel.from_pretrained(
-            model_path, trust_remote_code=True, **from_pretrained_kwargs
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
+        model = AutoModel.from_pretrained(model_path, trust_remote_code=True, **from_pretrained_kwargs)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1110,9 +1059,7 @@ class MPTAdapter(BaseModelAdapter):
             max_seq_len=8192,
             **from_pretrained_kwargs,
         )
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
         model.config.eos_token_id = tokenizer.eos_token_id
         model.config.pad_token_id = tokenizer.pad_token_id
         return model, tokenizer
@@ -1156,9 +1103,7 @@ class RwkvAdapter(BaseModelAdapter):
 
         model = RwkvModel(model_path)
         revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            "EleutherAI/pythia-160m", revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained("EleutherAI/pythia-160m", revision=revision)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1195,9 +1140,7 @@ class ReaLMAdapter(BaseModelAdapter):
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs
-        )
+        model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1208,7 +1151,12 @@ class ChatGPTAdapter(BaseModelAdapter):
     """The model adapter for ChatGPT"""
 
     def match(self, model_path: str):
-        return model_path in OPENAI_MODEL_LIST or model_path in INFERENCE_OPENAI_MODEL_LIST or model_path in XAI_MODEL_LIST or model_path in AWS_MODEL_LIST
+        return (
+            model_path in OPENAI_MODEL_LIST
+            or model_path in INFERENCE_OPENAI_MODEL_LIST
+            or model_path in XAI_MODEL_LIST
+            or model_path in AWS_MODEL_LIST
+        )
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         raise NotImplementedError()
@@ -1418,12 +1366,8 @@ class GuanacoAdapter(BaseModelAdapter):
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, use_fast=self.use_fast_tokenizer, revision=revision
-        )
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=self.use_fast_tokenizer, revision=revision)
+        model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs)
         # Fix a bug in tokenizer config
         tokenizer.eos_token_id = model.config.eos_token_id
         return model, tokenizer
@@ -1533,9 +1477,7 @@ class BaichuanAdapter(BaseModelAdapter):
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             trust_remote_code=True,
@@ -1567,9 +1509,7 @@ class XGenAdapter(BaseModelAdapter):
             trust_remote_code=True,
             **from_pretrained_kwargs,
         )
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
         model.config.eos_token_id = 50256
         return model, tokenizer
 
@@ -1606,9 +1546,7 @@ class InternLMChatAdapter(BaseModelAdapter):
         model = model.eval()
         if "8k" in model_path.lower():
             model.config.max_sequence_length = 8192
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1657,6 +1595,7 @@ class Llama2Adapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("llama-2")
 
+
 class Llama3Adapter(BaseModelAdapter):
     """The model adapter for Llama-3 (e.g., meta-llama/Meta-Llama-3-8B-Instruct)"""
 
@@ -1672,6 +1611,7 @@ class Llama3Adapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("llama-3")
 
+
 class CuteGPTAdapter(BaseModelAdapter):
     """The model adapter for CuteGPT"""
 
@@ -1680,9 +1620,7 @@ class CuteGPTAdapter(BaseModelAdapter):
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         tokenizer = LlamaTokenizer.from_pretrained(model_path)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs
-        )
+        model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **from_pretrained_kwargs)
         tokenizer.eos_token_id = tokenizer.convert_tokens_to_ids("<end>")
         model.config.eos_token_id = tokenizer.eos_token_id
         model.config.pad_token_id = tokenizer.eos_token_id
@@ -1705,16 +1643,11 @@ class OpenOrcaAdapter(BaseModelAdapter):
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return (
-            "mistral-7b-openorca" in model_path.lower()
-            or "openorca" in model_path.lower()
-        )
+        return "mistral-7b-openorca" in model_path.lower() or "openorca" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, use_fast=self.use_fast_tokenizer, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=self.use_fast_tokenizer, revision=revision)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             low_cpu_mem_usage=True,
@@ -1745,15 +1678,12 @@ class Hermes2Adapter(BaseModelAdapter):
 
     def match(self, model_path: str):
         return any(
-            model_str in model_path.lower()
-            for model_str in ["openhermes-2.5-mistral-7b", "openhermes-2-mistral-7b"]
+            model_str in model_path.lower() for model_str in ["openhermes-2.5-mistral-7b", "openhermes-2-mistral-7b"]
         )
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, use_fast=self.use_fast_tokenizer, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=self.use_fast_tokenizer, revision=revision)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             low_cpu_mem_usage=True,
@@ -1814,7 +1744,11 @@ class QwenChatAdapter(BaseModelAdapter):
     """
 
     def match(self, model_path: str):
-        return "qwen" in model_path.lower() or ("dracarys" in model_path.lower() and "llama" not in model_path.lower()) or "qwq" in model_path.lower()
+        return (
+            "qwen" in model_path.lower()
+            or ("dracarys" in model_path.lower() and "llama" not in model_path.lower())
+            or "qwq" in model_path.lower()
+        )
 
     def float_set(self, config, option):
         config.bf16 = False
@@ -1842,9 +1776,7 @@ class QwenChatAdapter(BaseModelAdapter):
         # NOTE: if you use the old version of model file, please remove the comments below
         # config.use_flash_attn = False
         self.float_set(config, "bf16")
-        generation_config = GenerationConfig.from_pretrained(
-            model_path, trust_remote_code=True
-        )
+        generation_config = GenerationConfig.from_pretrained(model_path, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             config=config,
@@ -1854,9 +1786,7 @@ class QwenChatAdapter(BaseModelAdapter):
         ).eval()
         if hasattr(model.config, "use_dynamic_ntk") and model.config.use_dynamic_ntk:
             model.config.max_sequence_length = 16384
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
         tokenizer.eos_token_id = config.eos_token_id
         tokenizer.bos_token_id = config.bos_token_id
         tokenizer.pad_token_id = generation_config.pad_token_id
@@ -1879,6 +1809,7 @@ class SmaugChatAdapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("qwen-7b-chat")
 
+
 class BGEAdapter(BaseModelAdapter):
     """The model adapter for BGE (e.g., BAAI/bge-large-en-v1.5)"""
 
@@ -1893,15 +1824,9 @@ class BGEAdapter(BaseModelAdapter):
             model_path,
             **from_pretrained_kwargs,
         )
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
-        if hasattr(model.config, "max_position_embeddings") and hasattr(
-            tokenizer, "model_max_length"
-        ):
-            model.config.max_sequence_length = min(
-                model.config.max_position_embeddings, tokenizer.model_max_length
-            )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
+        if hasattr(model.config, "max_position_embeddings") and hasattr(tokenizer, "model_max_length"):
+            model.config.max_sequence_length = min(model.config.max_position_embeddings, tokenizer.model_max_length)
         model.use_cls_pooling = True
         model.eval()
         return model, tokenizer
@@ -1924,15 +1849,9 @@ class E5Adapter(BaseModelAdapter):
             model_path,
             **from_pretrained_kwargs,
         )
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
-        if hasattr(model.config, "max_position_embeddings") and hasattr(
-            tokenizer, "model_max_length"
-        ):
-            model.config.max_sequence_length = min(
-                model.config.max_position_embeddings, tokenizer.model_max_length
-            )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
+        if hasattr(model.config, "max_position_embeddings") and hasattr(tokenizer, "model_max_length"):
+            model.config.max_sequence_length = min(model.config.max_position_embeddings, tokenizer.model_max_length)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1960,9 +1879,7 @@ class AquilaChatAdapter(BaseModelAdapter):
             **from_pretrained_kwargs,
         )
         model = model.eval()
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True, revision=revision
-        )
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, revision=revision)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -2067,9 +1984,7 @@ class OpenLLaMaOpenInstructAdapter(BaseModelAdapter):
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return (
-            "open-llama" in model_path.lower() and "open-instruct" in model_path.lower()
-        )
+        return "open-llama" in model_path.lower() and "open-instruct" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         revision = from_pretrained_kwargs.get("revision", "main")
@@ -2213,9 +2128,7 @@ class PygmalionAdapter(BaseModelAdapter):
     # use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return bool(
-            re.search(r"pygmalion|mythalion|metharme", model_path.lower(), re.I)
-        )
+        return bool(re.search(r"pygmalion|mythalion|metharme", model_path.lower(), re.I))
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("metharme")
@@ -2234,7 +2147,9 @@ class XdanAdapter(BaseModelAdapter):
 class MicrosoftOrcaAdapter(BaseModelAdapter):
     """The model adapter for Microsoft/Orca-2 series of models (e.g. Microsoft/Orca-2-7b, Microsoft/Orca-2-13b)"""
 
-    use_fast_tokenizer = False  # Flag neeeded since tokenizers>=0.13.3 is required for a normal functioning of this module
+    use_fast_tokenizer = (
+        False  # Flag neeeded since tokenizers>=0.13.3 is required for a normal functioning of this module
+    )
 
     def match(self, model_path: str):
         return "orca-2" in model_path.lower()
@@ -2269,7 +2184,9 @@ class DeepseekChatAdapter(BaseModelAdapter):
     # Note: that this model will require tokenizer version >= 0.13.3 because the tokenizer class is LlamaTokenizerFast
 
     def match(self, model_path: str):
-        return ("deepseek-llm" in model_path.lower() and "chat" in model_path.lower()) or  "deepseek-chat" in model_path.lower()
+        return (
+            "deepseek-llm" in model_path.lower() and "chat" in model_path.lower()
+        ) or "deepseek-chat" in model_path.lower()
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("deepseek-chat")
@@ -2437,6 +2354,7 @@ class GemmaAdapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("gemma")
 
+
 class PhiAdapter(BaseModelAdapter):
     """The model adapter for microsoft/phi"""
 
@@ -2477,6 +2395,7 @@ class CllmAdapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("cllm")
 
+
 class CohereAdapter(BaseModelAdapter):
     """The model adapter for Cohere"""
 
@@ -2488,7 +2407,6 @@ class CohereAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("api_based_default")
-
 
 
 # Note: the registration order matters.

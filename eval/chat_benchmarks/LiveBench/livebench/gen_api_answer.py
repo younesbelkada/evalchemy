@@ -46,9 +46,7 @@ def get_answer(
         answer_file: The path to the file in which to write answers
         api_dict: A dictionary specifying the base API URL and key for model requests
     """
-    assert (
-        args.force_temperature is not None and "required_temperature" in question.keys()
-    ) is False
+    assert (args.force_temperature is not None and "required_temperature" in question.keys()) is False
     if args.force_temperature is not None:
         temperature = args.force_temperature
     elif "required_temperature" in question.keys():
@@ -67,14 +65,10 @@ def get_answer(
             conv.append_message(conv.roles[1], None)
 
             if api_dict is not None:
-                output, num_tokens = chat_completion_openai(
-                    model, conv, temperature, max_tokens, api_dict=api_dict
-                )
+                output, num_tokens = chat_completion_openai(model, conv, temperature, max_tokens, api_dict=api_dict)
             else:
                 assert model.api_function is not None
-                output, num_tokens = model.api_function(
-                    model, conv, temperature, max_tokens, api_dict=api_dict
-                )
+                output, num_tokens = model.api_function(model, conv, temperature, max_tokens, api_dict=api_dict)
 
             conv.update_last_message(output)
             turns.append(output)
@@ -146,18 +140,14 @@ def run_questions(
                 )
                 futures.append(future)
 
-            for future in tqdm.tqdm(
-                concurrent.futures.as_completed(futures), total=len(futures)
-            ):
+            for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
                 future.result()
         if len(questions) > 0:
             reorg_answer_file(answer_file)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Generate benchmark question answers using an API-based model"
-    )
+    parser = argparse.ArgumentParser(description="Generate benchmark question answers using an API-based model")
     parser.add_argument(
         "--bench-name",
         type=str,
@@ -177,9 +167,7 @@ if __name__ == "__main__":
         default=1,
         help="How many completion choices to generate.",
     )
-    parser.add_argument(
-        "--force-temperature", type=float, help="Forcibly set a sampling temperature."
-    )
+    parser.add_argument("--force-temperature", type=float, help="Forcibly set a sampling temperature.")
     parser.add_argument(
         "--max-tokens",
         type=int,
@@ -191,12 +179,8 @@ if __name__ == "__main__":
         type=int,
         help="A debug option. The begin index of questions.",
     )
-    parser.add_argument(
-        "--question-end", type=int, help="A debug option. The end index of questions."
-    )
-    parser.add_argument(
-        "--parallel", type=int, default=1, help="The number of concurrent API calls."
-    )
+    parser.add_argument("--question-end", type=int, help="A debug option. The end index of questions.")
+    parser.add_argument("--parallel", type=int, default=1, help="The number of concurrent API calls.")
     parser.add_argument(
         "--question-source",
         type=str,
@@ -218,10 +202,7 @@ if __name__ == "__main__":
         help="A list of question ids to generate answers for.",
     )
     parser.add_argument(
-        "--resume",
-        action="store_true",
-        default=False,
-        help="Resume from the last question id in the file."
+        "--resume", action="store_true", default=False, help="Resume from the last question id in the file."
     )
     parser.add_argument(
         "--model-display-name",
@@ -241,9 +222,7 @@ if __name__ == "__main__":
     if args.livebench_release_option not in LIVE_BENCH_RELEASES:
         raise ValueError(f"Bad release {args.livebench_release_option}.")
 
-    release_set = set(
-        [r for r in LIVE_BENCH_RELEASES if r <= args.livebench_release_option]
-    )
+    release_set = set([r for r in LIVE_BENCH_RELEASES if r <= args.livebench_release_option])
 
     if args.api_base is not None:
         # use manually-specified model API
@@ -263,27 +242,21 @@ if __name__ == "__main__":
         for category_name, task_names in tasks.items():
             for task_name in task_names:
                 questions = load_questions(
-                    categories[category_name],
-                    release_set,
-                    args.livebench_release_option,
-                    task_name,
-                    args.question_id
+                    categories[category_name], release_set, args.livebench_release_option, task_name, args.question_id
                 )
 
-                questions = questions[args.question_begin:args.question_end]
+                questions = questions[args.question_begin : args.question_end]
 
-                task_full_name = (
-                    f"{LIVE_BENCH_DATA_SUPER_PATH}/{category_name}/{task_name}"
-                )
-                answer_file = (
-                    f"data/{task_full_name}/model_answer/{model.display_name}.jsonl"
-                )
+                task_full_name = f"{LIVE_BENCH_DATA_SUPER_PATH}/{category_name}/{task_name}"
+                answer_file = f"data/{task_full_name}/model_answer/{model.display_name}.jsonl"
 
                 if args.resume:
                     last_question_id = find_last_question_id(answer_file)
-                    last_question_id_index = next((i for i, q in enumerate(questions) if q['question_id'] == last_question_id), None)
+                    last_question_id_index = next(
+                        (i for i, q in enumerate(questions) if q["question_id"] == last_question_id), None
+                    )
                     if last_question_id_index is not None:
-                        questions = questions[last_question_id_index + 1:]
+                        questions = questions[last_question_id_index + 1 :]
                         print(f"Resuming from question {last_question_id_index + 1}")
                     else:
                         print(f"No question ids found in {answer_file}, starting from the beginning.")
@@ -311,26 +284,26 @@ if __name__ == "__main__":
             list_of_question_files = [original_question_file]
         else:
             # gather all question files for bench_name (e.g. if bench_name = live_bench/math)
-            list_of_question_files = glob.glob(
-                f"data/{args.bench_name}/**/question.jsonl", recursive=True
-            )
+            list_of_question_files = glob.glob(f"data/{args.bench_name}/**/question.jsonl", recursive=True)
 
         for question_file in list_of_question_files:
             print(question_file)
             questions = load_questions_jsonl(
                 question_file, release_set, args.livebench_release_option, args.question_id
             )
-            
-            questions = questions[args.question_begin:args.question_end]
+
+            questions = questions[args.question_begin : args.question_end]
 
             bench_name = os.path.dirname(question_file).replace("data/", "")
             answer_file = f"data/{bench_name}/model_answer/{model.display_name}.jsonl"
 
             if args.resume:
                 last_question_id = find_last_question_id(answer_file)
-                last_question_id_index = next((i for i, q in enumerate(questions) if q['question_id'] == last_question_id), None)
+                last_question_id_index = next(
+                    (i for i, q in enumerate(questions) if q["question_id"] == last_question_id), None
+                )
                 if last_question_id_index is not None:
-                    questions = questions[last_question_id_index + 1:]
+                    questions = questions[last_question_id_index + 1 :]
                     print(f"Resuming from question {last_question_id_index + 1}")
                 else:
                     print(f"No question ids found in {answer_file}, starting from the beginning.")

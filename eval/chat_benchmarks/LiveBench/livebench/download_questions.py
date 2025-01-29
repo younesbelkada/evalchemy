@@ -29,5 +29,5 @@ for category_name, task_names in tqdm(tasks.items()):
 
         question_file_path = task_path + "/question.jsonl"
 
-        with open(question_file_path, 'w') as f:
-            f.writelines([json.dumps(example, default=str) + '\n' for example in task_questions[task]])
+        with open(question_file_path, "w") as f:
+            f.writelines([json.dumps(example, default=str) + "\n" for example in task_questions[task]])

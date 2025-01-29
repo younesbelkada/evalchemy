@@ -27,7 +27,7 @@ class BaseBenchmark(ABC):
                     model, lm_eval_models.openai_completions.OpenAICompletionsAPI
                 ):
                     instance.args[1]["max_tokens"] = max_new_tokens
-                    if '4o' in model.model:
+                    if "4o" in model.model:
                         instance.args[1]["max_tokens"] = min(max_new_tokens, 16384)
                 elif isinstance(model, lm_eval_models.vllm_causallms.VLLM):
                     instance.args[1]["max_gen_toks"] = max_new_tokens

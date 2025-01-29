@@ -11,7 +11,23 @@ Evalchemy is a unified and easy-to-use toolkit for evaluating language models, f
 
 #### [2025.01.28] New Model Support
 - [vLLM models](https://blog.vllm.ai/2023/06/20/vllm.html): High-performance inference and serving engine with PagedAttention technology
+```bash
+python -m eval.eval \
+    --model vllm \                
+    --tasks alpaca_eval \    
+    --model_args "pretrained=meta-llama/Meta-Llama-3-8B-Instruct" \  
+    --batch_size 16 \         
+    --output_path logs 
+```
 - [OpenAI models](https://openai.com/): Full support for OpenAI's model lineup
+```bash
+python -m eval.eval \
+    --model openai-chat-completions \                
+    --tasks alpaca_eval \    
+    --model_args "model=gpt-4o-mini-2024-07-18,num_concurrent=32" \  
+    --batch_size 16 \         
+    --output_path logs 
+```
 
 #### [2025.01.27] New Benchmarks Added
 - BigCodeBench, MultiPL-E, CRUXEval, AIME24, AMC23, MATH500, LiveBench, GPQA Diamond, HumanEvalPlus, MBPPPlus

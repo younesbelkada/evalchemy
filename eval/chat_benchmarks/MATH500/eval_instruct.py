@@ -68,28 +68,20 @@ class MATH500Benchmark(BaseBenchmark):
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])},
             ]
 
-            generation_args = {
-                "do_sample": False,
-                "temperature": 0.7,
-            }
-            # Add max tokens except for OpenAI models
-            if not isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
-                generation_args["max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens"] = self.max_new_tokens
-            else:
-                if "o1-mini" in model_name:  # o1-mini is a special case for OpenAI models
-                    generation_args["max_tokens"] = 32768
-                    generation_args["temperature"] = 1
-                else:
-                    generation_args["max_tokens"] = 4096
-                    generation_args["temperature"] = 0.2
-
             templated_messages = model.apply_chat_template(messages)
 
             all_instances.append(
                 Instance(
                     "generate_until",
                     example,
-                    (templated_messages, generation_args),
+                    (
+                        templated_messages,
+                        {
+                            "do_sample": False,
+                            "max_new_tokens": self.max_new_tokens,
+                            "temperature": 0.7,
+                        },
+                    ),
                     idx,
                 )
             )

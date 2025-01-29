@@ -9,6 +9,7 @@ from tqdm import tqdm
 from lm_eval.api.instance import Instance
 
 from lm_eval.api.model import LM
+import lm_eval.models as lm_eval_models
 
 import json
 import os
@@ -135,10 +136,9 @@ class LiveBenchBenchmark(BaseBenchmark):
     def _get_model_name(self, model: LM) -> str:
         if "model_identifier" in model.__dict__:
             return (
-                model.model_identifier.split("pretrained=")[1]
+                model.model_identifier.split("=")[1]
                 .split(",")[0]
                 .split("__")[-1]
-                .replace("Meta-", "")
                 .replace("-", "_")
                 .lower()
                 .replace(".", "")
@@ -181,6 +181,7 @@ class LiveBenchBenchmark(BaseBenchmark):
                         all_convs[idx].append_message(all_convs[idx].roles[1], None)
 
                         prompt = all_convs[idx].get_prompt()
+
                         all_instances.append(
                             Instance(
                                 "generate_until",
@@ -188,7 +189,7 @@ class LiveBenchBenchmark(BaseBenchmark):
                                 (
                                     str(prompt),
                                     {
-                                        "max_gen_toks": self.max_tokens,
+                                        "max_new_tokens": self.max_tokens,
                                         "do_sample": self.temperature >= 1e-4,
                                         "temperature": self.temperature,
                                     },

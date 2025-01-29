@@ -6,6 +6,16 @@
 
 Evalchemy is a unified and easy-to-use toolkit for evaluating language models, focussing on post-trained models. Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bespoke Labs](https://bespokelabs.ai)  and builds on the [LM-Eval-Harness](https://github.com/EleutherAI/lm-evaluation-harness) to provide a unified, easy-to-use platform for language model evaluation. Evalchemy integrates multiple existing benchmarks, such as RepoBench, AlpacaEval, and ZeroEval. We've streamlined the process by:
 
+
+## 🎉 What's New 
+
+#### [2025.01.28] New Model Support
+- [vLLM models](https://blog.vllm.ai/2023/06/20/vllm.html): High-performance inference and serving engine with PagedAttention technology
+- [OpenAI models](https://openai.com/): Full support for OpenAI's model lineup
+
+#### [2025.01.27] New Benchmarks Added
+- BigCodeBench, MultiPL-E, CRUXEval, AIME24, AMC23, MATH500, LiveBench, GPQA Diamond, HumanEvalPlus, MBPPPlus
+
 ### Key Features
 
 - **Unified Installation**: One-step setup for all benchmarks, eliminating dependency conflicts
@@ -132,10 +142,6 @@ Through LM-Eval-Harness, we support all HuggingFace models and are currently add
 
 To choose a model, simply set 'pretrained=<name of hf model>' where the model name can either be a HuggingFace model name or a path to a local model. 
 
-#### Coming Soon
-- Support for [vLLM models](https://vllm.ai/)
-- Support for [OpenAI](https://openai.com/)
-- Few-shot prompting for instruction benchmarks.
 
 ### Multi-GPU Evaluation
 

@@ -100,7 +100,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
             if not isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
                 generation_args["max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens"] = self.max_new_tokens
             else:
-                if 'o1-mini' in model_name: # o1-mini is a special case for OpenAI models
+                if "o1-mini" in model_name:  # o1-mini is a special case for OpenAI models
                     generation_args["max_tokens"] = 32768
                     generation_args["temperature"] = 1
                 else:

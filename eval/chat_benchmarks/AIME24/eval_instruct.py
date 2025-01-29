@@ -63,7 +63,7 @@ class AIME24Benchmark(BaseBenchmark):
             model_name = str(f"openai/{model.model}")
         else:
             model_name = model.model_args["model"]
-        
+
         for idx, example in enumerate(examples):
             messages = [
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])},
@@ -76,8 +76,8 @@ class AIME24Benchmark(BaseBenchmark):
             # Add max tokens except for OpenAI models
             if not isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
                 generation_args["max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens"] = self.max_new_tokens
-            else: # OpenAI models
-                if 'o1-mini' in model_name: # o1-mini is a special case for OpenAI models
+            else:  # OpenAI models
+                if "o1-mini" in model_name:  # o1-mini is a special case for OpenAI models
                     generation_args["max_tokens"] = 32768
                     generation_args["temperature"] = 1
                 else:

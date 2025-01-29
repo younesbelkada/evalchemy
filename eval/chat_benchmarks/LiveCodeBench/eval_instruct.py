@@ -15,7 +15,6 @@ import copy
 from .livecodebench_utils import lcb_run, map_to_example, has_test_type, post_process_code, translate_private_test_cases
 
 from eval.task import BaseBenchmark
-from eval.utils import SYSTEM_PROMPT
 from datasets import load_dataset
 
 import lm_eval.models
@@ -76,9 +75,10 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
         all_instances = []
         if isinstance(model, lm_eval.models.huggingface.HFLM):
             model_name = model.pretrained
+        elif isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
+            model_name = str(f"openai/{model.model}")
         else:
             model_name = model.model_args["model"]
-        system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             if example["is_stdin"]:
                 prompt_text = (
@@ -90,14 +90,24 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
                     "Generate an executable Python function generated from the given prompt. Return the function body without invoking it at the final solution."
                     + example["prompt"]
                 )
-            messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt_text}]
-            templated_messages = model.apply_chat_template(messages)
+            messages = [{"role": "user", "content": prompt_text}]
 
             generation_args = {
                 "do_sample": False,
-                "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens,
                 "temperature": 0.7,
             }
+            # Add max tokens except for OpenAI models
+            if not isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
+                generation_args["max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens"] = self.max_new_tokens
+            else:
+                if "o1-mini" in model_name:  # o1-mini is a special case for OpenAI models
+                    generation_args["max_tokens"] = 32768
+                    generation_args["temperature"] = 1
+                else:
+                    generation_args["max_tokens"] = 4096
+                    generation_args["temperature"] = 0.2
+
+            templated_messages = model.apply_chat_template(messages)
 
             all_instances.append(
                 Instance(

@@ -53,8 +53,10 @@ huggingface-cli login
   - **IFEval**: [Instruction following capability evaluation](https://github.com/google-research/google-research/tree/master/instruction_following_eval)
   - **AlpacaEval**: [Instruction following evaluation](https://github.com/tatsu-lab/alpaca_eval)
   - **HumanEval**: [Code generation and problem solving](https://github.com/openai/human-eval)
+  - **HumanEvalPlus**: [HumanEval with more test cases](https://github.com/evalplus/evalplus)
   - **ZeroEval**: [Logical reasoning and problem solving](https://github.com/WildEval/ZeroEval)
   - **MBPP**: [Python programming benchmark](https://github.com/google-research/google-research/tree/master/mbpp)
+  - **MBPPPlus**: [MBPP with more test cases](https://github.com/evalplus/evalplus)
   - **BigCodeBench:** [Benchmarking Code Generation with Diverse Function Calls and Complex Instructions](https://arxiv.org/abs/2406.15877)
 
     > **🚨 Warning:** for BigCodeBench evaluation, we strongly recommend using a Docker container since the execution of LLM generated code on a machine can lead to destructive outcomes. More info is [here](eval/chat_benchmarks/BigCodeBench/README.md).

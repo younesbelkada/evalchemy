@@ -7,7 +7,6 @@ from lm_eval.api.model import LM
 from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string, remove_boxed
 
 from eval.task import BaseBenchmark
-from eval.utils import SYSTEM_PROMPT
 import lm_eval.models
 from lm_eval.models.vllm_causallms import VLLM
 
@@ -64,10 +63,8 @@ class MATH500Benchmark(BaseBenchmark):
             model_name = str(f"openai/{model.model}")
         else:
             model_name = model.model_args["model"]
-        system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [
-                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])},
             ]
 
@@ -82,10 +79,6 @@ class MATH500Benchmark(BaseBenchmark):
                 if 'o1-mini' in model_name: # o1-mini is a special case for OpenAI models
                     generation_args["max_tokens"] = 32768
                     generation_args["temperature"] = 1
-                    messages = [
-                        {"role": "user", "content": system_prompt},
-                        {"role": "user", "content": PROMPT.format(problem=example["problem"])},
-                    ]
                 else:
                     generation_args["max_tokens"] = 4096
                     generation_args["temperature"] = 0.2

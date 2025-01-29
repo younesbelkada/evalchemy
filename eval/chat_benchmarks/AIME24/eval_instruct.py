@@ -10,7 +10,6 @@ from eval.task import BaseBenchmark
 
 import lm_eval.models
 from lm_eval.models.vllm_causallms import VLLM
-from eval.utils import SYSTEM_PROMPT
 
 # Modified version of hendrycks_math with additional instruction to mark the solution with \\boxed
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
@@ -65,10 +64,8 @@ class AIME24Benchmark(BaseBenchmark):
         else:
             model_name = model.model_args["model"]
         
-        system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
             messages = [
-                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])},
             ]
 
@@ -79,14 +76,10 @@ class AIME24Benchmark(BaseBenchmark):
             # Add max tokens except for OpenAI models
             if not isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
                 generation_args["max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens"] = self.max_new_tokens
-            else:
+            else: # OpenAI models
                 if 'o1-mini' in model_name: # o1-mini is a special case for OpenAI models
                     generation_args["max_tokens"] = 32768
                     generation_args["temperature"] = 1
-                    messages = [
-                        {"role": "user", "content": system_prompt},
-                        {"role": "user", "content": PROMPT.format(problem=example["problem"])},
-                    ]
                 else:
                     generation_args["max_tokens"] = 4096
                     generation_args["temperature"] = 0.2

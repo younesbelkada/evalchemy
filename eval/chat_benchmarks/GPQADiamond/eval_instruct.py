@@ -7,7 +7,6 @@ from datasets import load_dataset
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
 from eval.task import BaseBenchmark
-from eval.utils import SYSTEM_PROMPT
 
 from .testing_utils import get_multiple_choice_answer
 
@@ -65,14 +64,12 @@ class GPQADiamondBenchmark(BaseBenchmark):
             model_name = str(f"openai/{model.model}")
         else:
             model_name = model.model_args["model"]
-        system_prompt = SYSTEM_PROMPT[model_name]
 
         for idx, example in enumerate(examples):
             multiple_choice_string, correct_answer = self.generate_multiple_choice_answers(example)
             example["answer"] = correct_answer
 
             messages = [
-                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
             ]
 
@@ -87,10 +84,6 @@ class GPQADiamondBenchmark(BaseBenchmark):
                 if 'o1-mini' in model_name: # o1-mini is a special case for OpenAI models
                     generation_args["max_tokens"] = 32768
                     generation_args["temperature"] = 1
-                    messages = [
-                        {"role": "user", "content": system_prompt},
-                        {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
-                    ]
                 else:
                     generation_args["max_tokens"] = 4096
                     generation_args["temperature"] = 0.2

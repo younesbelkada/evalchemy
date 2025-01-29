@@ -132,10 +132,10 @@ Through LM-Eval-Harness, we support all HuggingFace models and are currently add
 
 To choose a model, simply set 'pretrained=<name of hf model>' where the model name can either be a HuggingFace model name or a path to a local model. 
 
-#### Coming Soon
+#### What's new
 - Support for [vLLM models](https://vllm.ai/)
 - Support for [OpenAI](https://openai.com/)
-- Few-shot prompting for instruction benchmarks.
+
 
 ### Multi-GPU Evaluation
 

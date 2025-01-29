@@ -60,9 +60,14 @@ huggingface-cli login
   - **BigCodeBench:** [Benchmarking Code Generation with Diverse Function Calls and Complex Instructions](https://arxiv.org/abs/2406.15877)
 
     > **🚨 Warning:** for BigCodeBench evaluation, we strongly recommend using a Docker container since the execution of LLM generated code on a machine can lead to destructive outcomes. More info is [here](eval/chat_benchmarks/BigCodeBench/README.md).
+  - **MultiPL-E:** [Multi-Programming Language Evaluation of Large Language Models of Code](https://github.com/nuprl/MultiPL-E/)
+  - **CRUXEval:** [Code Reasoning, Understanding, and Execution Evaluation](https://arxiv.org/abs/2401.03065)
   - **AIME24**: [Math Reasoning Dataset](https://huggingface.co/datasets/AI-MO/aimo-validation-aime)
   - **AMC23**: [Math Reasoning Dataset](https://huggingface.co/datasets/AI-MO/aimo-validation-amc)
   - **MATH500**: [Math Reasoning Dataset](https://huggingface.co/datasets/HuggingFaceH4/MATH-500) split from [Let's Verify Step by Step](https://github.com/openai/prm800k/tree/main?tab=readme-ov-file#math-splits)
+  - **LiveCodeBench**: [Benchmark of LLMs for code](https://livecodebench.github.io/)
+  - **LiveBench**: [A benchmark for LLMs designed with test set contamination and objective evaluation in mind](https://livebench.ai/#/)
+  - **GPQA Diamond**: [A Graduate-Level Google-Proof Q&A Benchmark](https://huggingface.co/datasets/Idavidrein/gpqa)
   - **Arena-Hard-Auto** (Coming soon): [Automatic evaluation tool for instruction-tuned LLMs](https://github.com/lmarena/arena-hard-auto)
   - **SWE-Bench** (Coming soon): [Evaluating large language models on real-world software issues](https://github.com/princeton-nlp/SWE-bench)
   - **SafetyBench** (Coming soon): [Evaluating the safety of LLMs](https://github.com/thu-coai/SafetyBench)

@@ -7,6 +7,10 @@ from lm_eval.api.model import LM
 from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string, remove_boxed
 
 from eval.task import BaseBenchmark
+from eval.utils import SYSTEM_PROMPT
+
+import lm_eval.models
+from lm_eval.models.vllm_causallms import VLLM
 
 # Modified version of hendrycks_math with additional instruction to mark the solution with \\boxed
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
@@ -39,7 +43,7 @@ class AMC23Benchmark(BaseBenchmark):
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
-        self.max_new_tokens = 8192  # set higher to avoid truncation for reasoning models
+        self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -56,14 +60,29 @@ class AMC23Benchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
+        if isinstance(model, lm_eval.models.huggingface.HFLM):
+            model_name = model.pretrained
+        else:
+            model_name = model.model_args["model"]
+        system_prompt = SYSTEM_PROMPT[model_name]
         for idx, example in enumerate(examples):
-            messages = [{"role": "user", "content": PROMPT.format(problem=example["question"])}]
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": PROMPT.format(problem=example["question"])},
+            ]
             templated_messages = model.apply_chat_template(messages)
+
+            generation_args = {
+                "do_sample": False,
+                "max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens": self.max_new_tokens,
+                "temperature": 0.7,
+            }
+
             all_instances.append(
                 Instance(
                     "generate_until",
                     example,
-                    (templated_messages, {"do_sample": False, "max_new_tokens": self.max_new_tokens}),
+                    (templated_messages, generation_args),
                     idx,
                 )
             )

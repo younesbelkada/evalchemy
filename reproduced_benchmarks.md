@@ -69,7 +69,7 @@
 |             |         |                                         | complete (pass@1)             | 41.9        | 40.5             |                                     |
 |             |         | Qwen/Qwen2.5-7B-Instruct                | instruct (pass@1)             | 35.2        | 37.6             |                                     |
 |             |         |                                         | complete (pass@1)             | 46.7        | 46.1             |                                     |
-| LiveBench   | Negin   | Meta-Llama-3-8B-Instruct                | global_average                | 24.99       | 26.74            | https://livebench.ai/#/?q=3.1
+| LiveBench   | Negin   | Meta-Llama-3-8B-Instruct                | global_average                | 26.78       | 26.74            | https://livebench.ai/#/?q=3.1
 |HumanEvalPlus| Sedrick | mistralai/Mistral-7B-Instruct-v0.2      | accuracy (pass@1)             | 27.44       | 36.0             | [EvalPlus Leaderboard](https://evalplus.github.io/leaderboard.html) |
 |             |         | meta-llama/Llama-3.1-8B-Instruct        | accuracy (pass@1)             | 62.2        | 62.8             | [EvalPlus Leaderboard](https://evalplus.github.io/leaderboard.html) |
 |             |         | google/codegemma-7b-it                  | accuracy (pass@1)             | 36.6        | 51.8             | [EvalPlus Leaderboard](https://evalplus.github.io/leaderboard.html) |

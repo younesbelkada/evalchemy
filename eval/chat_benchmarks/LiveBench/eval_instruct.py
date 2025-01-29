@@ -180,14 +180,17 @@ class LiveBenchBenchmark(BaseBenchmark):
                         all_convs[idx].append_message(all_convs[idx].roles[0], qs)
                         all_convs[idx].append_message(all_convs[idx].roles[1], None)
 
-                        prompt = all_convs[idx].get_prompt()
+                        messages = [
+                            {"role": "user", "content": all_convs[idx].get_prompt()},
+                        ]
+                        templated_messages = model.apply_chat_template(messages)
 
                         all_instances.append(
                             Instance(
                                 "generate_until",
                                 all_convs[idx],
                                 (
-                                    str(prompt),
+                                    templated_messages,
                                     {
                                         "max_new_tokens": self.max_tokens,
                                         "do_sample": self.temperature >= 1e-4,
@@ -225,7 +228,7 @@ class LiveBenchBenchmark(BaseBenchmark):
                             output = output[: output.find(all_convs[idx].stop_str)]
 
                         # Handle special tokens like in gen_model_answer.py
-                        if hasattr(model, "tokenizer"):
+                        if hasattr(model, "tokenizer") and hasattr(model.tokenizer, "special_tokens_map"):
                             for special_token in model.tokenizer.special_tokens_map.values():
                                 if isinstance(special_token, list):
                                     for special_tok in special_token:

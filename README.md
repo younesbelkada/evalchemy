@@ -30,7 +30,7 @@ python -m eval.eval \
 ```
 
 #### [2025.01.27] New Benchmarks Added
-- BigCodeBench, MultiPL-E, CRUXEval, AIME24, AMC23, MATH500, LiveBench, GPQA Diamond, HumanEvalPlus, MBPPPlus
+- BigCodeBench, MultiPL-E, CRUXEval, AIME24, AMC23, MATH500, LiveCodeBench, GPQA Diamond, HumanEvalPlus, MBPPPlus
 
 ### Key Features
 

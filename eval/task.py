@@ -26,7 +26,9 @@ class BaseBenchmark(ABC):
                 if isinstance(model, lm_eval_models.openai_completions.OpenAIChatCompletion) or isinstance(
                     model, lm_eval_models.openai_completions.OpenAICompletionsAPI
                 ):
-                    instance.args[1]["max_completion_tokens"] = max_new_tokens  # this is an upper bound to max_tokens
+                    instance.args[1]["max_tokens"] = max_new_tokens
+                    if '4o' in model.model:
+                        instance.args[1]["max_tokens"] = min(max_new_tokens, 16384)
                 elif isinstance(model, lm_eval_models.vllm_causallms.VLLM):
                     instance.args[1]["max_gen_toks"] = max_new_tokens
                 else:

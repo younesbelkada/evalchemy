@@ -9,9 +9,7 @@ Evalchemy is a unified and easy-to-use toolkit for evaluating language models, f
 
 ## 🎉 What's New 
 
-#### [2025.01.30] New Reasoning Benchmarks and API Model Support
-
-- [Reasoning Benchmarks](https://www.open-thoughts.ai/blog/measuring): AIME24, AMC23, MATH500, LiveCodeBench, GPQA-Diamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval benchmarks added as part of our [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project
+#### [2025.01.30] API Model Support
 
 - [API models via Curator](https://github.com/bespokelabsai/curator/): With `--model curator` you can now evaluate with even more API based models via [Curator](https://github.com/bespokelabsai/curator/), including all those supported by [LiteLLM](https://docs.litellm.ai/docs/providers) 
 
@@ -25,6 +23,9 @@ Evalchemy is a unified and easy-to-use toolkit for evaluating language models, f
         --output_path logs
 ```
 
+#### [2025.01.29] New Reasoning Benchmarks
+
+- [Reasoning Benchmarks](https://www.open-thoughts.ai/blog/measuring): AIME24, AMC23, MATH500, LiveCodeBench, GPQA-Diamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval benchmarks added as part of our [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project
 
 #### [2025.01.28] New Model Support
 - [vLLM models](https://blog.vllm.ai/2023/06/20/vllm.html): High-performance inference and serving engine with PagedAttention technology
@@ -45,9 +46,6 @@ python -m eval.eval \
     --batch_size 16 \
     --output_path logs 
 ```
-
-#### [2025.01.27] New Benchmarks Added
-- BigCodeBench, MultiPL-E, CRUXEval, AIME24, AMC23, MATH500, LiveCodeBench, GPQA Diamond, HumanEvalPlus, MBPPPlus
 
 ### Key Features
 

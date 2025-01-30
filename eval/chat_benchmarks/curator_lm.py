@@ -45,6 +45,10 @@ class CuratorAPIModel(TemplateLM):
         self.llm = None
         self.gen_kwargs = {}
         self.eos = None
+        if "temperature" in kwargs:
+            self.gen_kwargs["temperature"] = kwargs["temperature"]
+        if "top_p" in kwargs:
+            self.gen_kwargs["top_p"] = kwargs["top_p"]
         self.backend_params = {
             "invalid_finish_reasons": [
                 "content_filter"
@@ -74,14 +78,21 @@ class CuratorAPIModel(TemplateLM):
     ) -> dict:
         assert generate, "Curator only supports generation."
         # Create the payload for the API request
-        max_tokens = gen_kwargs.get("max_gen_toks", self.max_length)
-        temperature = gen_kwargs.get("temperature", 0)
+        max_tokens = self.max_length or gen_kwargs.get("max_gen_toks", self.max_length)
+        temperature = self.gen_kwargs.get("temperature", gen_kwargs.get("temperature", 0))
+        top_p = self.gen_kwargs.get("top_p", gen_kwargs.get("top_p", 0.95))
         stop = handle_stop_sequences(gen_kwargs.get("until", None), eos)
         gen_kwargs = {
             "max_completion_tokens": max_tokens,
             "temperature": temperature,
+            "top_p": top_p,
             "stop": stop,
         }
+        if "o1" in self.model_name:
+            print("Warning: O1 model does not support top_p, stop, or temperature. Ignoring them.")
+            gen_kwargs.pop("top_p")
+            gen_kwargs.pop("stop")
+            gen_kwargs.pop("temperature")
         if self.llm is None:
             self.eos = eos
             self.gen_kwargs = gen_kwargs.copy()

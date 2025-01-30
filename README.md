@@ -11,9 +11,19 @@ Evalchemy is a unified and easy-to-use toolkit for evaluating language models, f
 
 #### [2025.01.30] New Reasoning Benchmarks and API Model Support
 
-We've added AIME24, AMC23, MATH500, LiveCodeBench, GPQA, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval benchmarks as part of our [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project. 
+We've added AIME24, AMC23, MATH500, LiveCodeBench, GPQA-Diamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval benchmarks as part of our [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project. 
 
-We've also integrated [Curator](https://github.com/bespokelabsai/curator/) as `--model` option to make evaluating even more API based models possible, including all those supported by [LiteLLM](https://docs.litellm.ai/docs/providers). 
+We've also integrated [Curator](https://github.com/bespokelabsai/curator/) as an option for `--model` to make evaluating even more API based models possible, including all those supported by [LiteLLM](https://docs.litellm.ai/docs/providers). 
+
+```
+  python -m eval.eval \
+        --model curator  \
+        --tasks AIME24,MATH500,GPQA-Diamond \
+        --model_name "gemini/gemini-2.0-flash-thinking-exp-01-21" \
+        --apply_chat_template False \
+        --model_args 'tokenized_requests=False' \
+        --output_path logs
+```
 
 
 #### [2025.01.28] New Model Support

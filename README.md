@@ -13,19 +13,19 @@ Evalchemy is a unified and easy-to-use toolkit for evaluating language models, f
 - [vLLM models](https://blog.vllm.ai/2023/06/20/vllm.html): High-performance inference and serving engine with PagedAttention technology
 ```bash
 python -m eval.eval \
-    --model vllm \                
-    --tasks alpaca_eval \    
-    --model_args "pretrained=meta-llama/Meta-Llama-3-8B-Instruct" \  
-    --batch_size 16 \         
-    --output_path logs 
+    --model vllm \
+    --tasks alpaca_eval \
+    --model_args "pretrained=meta-llama/Meta-Llama-3-8B-Instruct" \
+    --batch_size 16 \
+    --output_path logs
 ```
 - [OpenAI models](https://openai.com/): Full support for OpenAI's model lineup
 ```bash
 python -m eval.eval \
-    --model openai-chat-completions \                
-    --tasks alpaca_eval \    
-    --model_args "model=gpt-4o-mini-2024-07-18,num_concurrent=32" \  
-    --batch_size 16 \         
+    --model openai-chat-completions \
+    --tasks alpaca_eval \
+    --model_args "model=gpt-4o-mini-2024-07-18,num_concurrent=32" \
+    --batch_size 16 \
     --output_path logs 
 ```
 
@@ -97,6 +97,7 @@ huggingface-cli login
   - **Arena-Hard-Auto** (Coming soon): [Automatic evaluation tool for instruction-tuned LLMs](https://github.com/lmarena/arena-hard-auto)
   - **SWE-Bench** (Coming soon): [Evaluating large language models on real-world software issues](https://github.com/princeton-nlp/SWE-bench)
   - **SafetyBench** (Coming soon): [Evaluating the safety of LLMs](https://github.com/thu-coai/SafetyBench)
+  - **SciCode Bench** (Coming soon): [Evaluate language models in generating code for solving realistic scientific research problems](https://github.com/scicode-bench/SciCode)
   - **Berkeley Function Calling Leaderboard** (Coming soon): [Evaluating ability of LLMs to use APIs](https://gorilla.cs.berkeley.edu/blogs/13_bfcl_v3_multi_turn.html)
   
 

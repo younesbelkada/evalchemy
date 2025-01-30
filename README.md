@@ -25,7 +25,7 @@ Evalchemy is a unified and easy-to-use toolkit for evaluating language models, f
 
 #### [2025.01.29] New Reasoning Benchmarks
 
-- [Reasoning Benchmarks](https://www.open-thoughts.ai/blog/measuring): AIME24, AMC23, MATH500, LiveCodeBench, GPQA-Diamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval benchmarks added as part of our [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project
+- AIME24, AMC23, MATH500, LiveCodeBench, GPQA-Diamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval benchmarks added as part of our [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project. See the [blog post](https://www.open-thoughts.ai/blog/measuring) for more. 
 
 #### [2025.01.28] New Model Support
 - [vLLM models](https://blog.vllm.ai/2023/06/20/vllm.html): High-performance inference and serving engine with PagedAttention technology

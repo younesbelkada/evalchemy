@@ -16,3 +16,7 @@ tasks:
     batch_size: 32
   - task_name: MBPP
     batch_size: 32
+  - task_name: LiveBench
+    batch_size: 32
+  - task_name: LiveCodeBench
+    batch_size: 32

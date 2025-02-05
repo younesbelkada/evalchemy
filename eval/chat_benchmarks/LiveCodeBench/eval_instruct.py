@@ -43,7 +43,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
     def __init__(
         self,
         debug: bool = False,
-        seed: List[int] = [0,1234,1234,1234],
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """

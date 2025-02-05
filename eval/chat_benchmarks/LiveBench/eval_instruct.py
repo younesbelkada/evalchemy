@@ -49,7 +49,7 @@ class LiveBenchBenchmark(BaseBenchmark):
         release_date: str = "2024-08-31",
         annotator_model: str = "gpt-4o-mini-2024-07-18",
         remove_existing_file: bool = True,
-        seed: List[int] = [0,1234,1234,1234],
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """

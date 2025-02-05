@@ -28,7 +28,7 @@ class AIME24Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/AIME24/data/aime24.json",
         debug: bool = False,
-        seed: List[int] = [0,1234,1234,1234],
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -66,7 +66,7 @@ class AIME24Benchmark(BaseBenchmark):
         for idx, example in enumerate(examples):
             # Calculate a new seed based on the base seed and the example index
             current_seed = [s + idx for s in self.seed] if self.seed is not None else None
-            
+
             messages = [
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])},
             ]

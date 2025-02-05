@@ -29,7 +29,7 @@ class AMC23Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/AMC23/data/amc23.json",
         debug: bool = False,
-        seed: List[int] = [0,1234,1234,1234],
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """

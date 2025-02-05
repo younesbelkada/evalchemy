@@ -27,7 +27,7 @@ class MATH500Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/MATH500/data/math500.jsonl",
         debug: bool = False,
-        seed: List[int] = [0,1234,1234,1234],
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """

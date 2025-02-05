@@ -28,6 +28,7 @@ class AIME24Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/AIME24/data/aime24.json",
         debug: bool = False,
+        seed: List[int] = [0,1234,1234,1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -42,6 +43,8 @@ class AIME24Benchmark(BaseBenchmark):
         self.data_file = data_file
         self.debug = debug
         self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
+        self.seed = seed
+        self.n_repeat = 5
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -58,7 +61,12 @@ class AIME24Benchmark(BaseBenchmark):
         # Prepare instances for model
         all_instances = []
 
+        examples = examples * self.n_repeat
+
         for idx, example in enumerate(examples):
+            # Calculate a new seed based on the base seed and the example index
+            current_seed = [s + idx for s in self.seed] if self.seed is not None else None
+            
             messages = [
                 {"role": "user", "content": PROMPT.format(problem=example["problem"])},
             ]
@@ -75,6 +83,7 @@ class AIME24Benchmark(BaseBenchmark):
                             "do_sample": False,
                             "max_new_tokens": self.max_new_tokens,
                             "temperature": 0.7,
+                            "seed": current_seed,
                         },
                     ),
                     idx,

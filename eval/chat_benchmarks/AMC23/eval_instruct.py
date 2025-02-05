@@ -29,6 +29,7 @@ class AMC23Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/AMC23/data/amc23.json",
         debug: bool = False,
+        seed: List[int] = [0,1234,1234,1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -42,7 +43,9 @@ class AMC23Benchmark(BaseBenchmark):
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
+        self.seed = seed
         self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
+        self.n_repeat = 5
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -57,6 +60,8 @@ class AMC23Benchmark(BaseBenchmark):
         """
         examples = self.load_questions()
 
+        examples = examples * self.n_repeat
+
         # Prepare instances for model
         all_instances = []
         if isinstance(model, lm_eval.models.huggingface.HFLM):
@@ -67,6 +72,8 @@ class AMC23Benchmark(BaseBenchmark):
             model_name = model.model_args["model"]
 
         for idx, example in enumerate(examples):
+            current_seed = [s + idx for s in self.seed] if self.seed is not None else None
+
             messages = [
                 {"role": "user", "content": PROMPT.format(problem=example["question"])},
             ]
@@ -83,6 +90,7 @@ class AMC23Benchmark(BaseBenchmark):
                             "do_sample": False,
                             "max_new_tokens": self.max_new_tokens,
                             "temperature": 0.7,
+                            "seed": current_seed,
                         },
                     ),
                     idx,

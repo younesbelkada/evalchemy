@@ -29,6 +29,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
     def __init__(
         self,
         debug: bool = False,
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -41,6 +42,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         super().__init__(logger)
         self.dataset_name = "Idavidrein/gpqa"
         self.debug = debug
+        self.seed = seed
         self.max_new_tokens = 32768
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
@@ -76,6 +78,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
             generation_args = {
                 "do_sample": False,
                 "temperature": 0.7,
+                "seed": self.seed,
             }
             # Add max tokens except for OpenAI models
             if not isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):

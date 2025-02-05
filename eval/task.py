@@ -44,7 +44,7 @@ class BaseBenchmark(ABC):
                 elif isinstance(model, lm_eval_models.vllm_causallms.VLLM):
                     instance.args[1]["max_gen_toks"] = max_new_tokens
                     instance.args[1]["seed"] = seeds[0] if "seed" in instance.args[1] else None
-                else:  # Huggingface
+                else:  # Huggingface does not support seed
                     _ = instance.args[1].pop("seed") if "seed" in instance.args[1] else None
                     instance.args[1]["max_new_tokens"] = max_new_tokens
         return instances

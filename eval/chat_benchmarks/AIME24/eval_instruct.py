@@ -1,6 +1,7 @@
 import json
 import logging
 from typing import Any, Dict, List, Optional
+import numpy as np
 
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
@@ -59,48 +60,50 @@ class AIME24Benchmark(BaseBenchmark):
         """
         examples = self.load_questions()
         # Prepare instances for model
-        all_instances = []
+        all_outputs = []
 
-        examples = examples * self.n_repeat
+        for i in range(self.n_repeat):
+            all_instances = []
+            seed = [s + i for s in self.seed]
 
-        for idx, example in enumerate(examples):
-            # Calculate a new seed based on the base seed and the example index
-            current_seed = [s + idx for s in self.seed] if self.seed is not None else None
+            for idx, example in enumerate(examples):
+                # Calculate a new seed based on the base seed and the example index
+                # current_seed = [s + 0 for s in self.seed] if self.seed is not None else None
 
-            messages = [
-                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
-            ]
+                messages = [
+                    {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+                ]
 
-            templated_messages = model.apply_chat_template(messages)
+                templated_messages = model.apply_chat_template(messages)
 
-            all_instances.append(
-                Instance(
-                    "generate_until",
-                    example,
-                    (
-                        templated_messages,
-                        {
-                            "do_sample": False,
-                            "max_new_tokens": self.max_new_tokens,
-                            "temperature": 0.7,
-                            "seed": current_seed,
-                        },
-                    ),
-                    idx,
+                all_instances.append(
+                    Instance(
+                        "generate_until",
+                        example,
+                        (
+                            templated_messages,
+                            {
+                                "do_sample": False,
+                                "max_new_tokens": self.max_new_tokens,
+                                "temperature": 0.7,
+                                "seed": seed,
+                            },
+                        ),
+                        idx,
+                    )
                 )
-            )
 
-        # Generate model responses
-        self.logger.info("Generating responses for AIME24...")
-        outputs = self.compute(model, all_instances)
-
+            # Generate model responses
+            self.logger.info("Generating responses for AIME24...")
+            outputs = self.compute(model, all_instances)
+            all_outputs.append(outputs)
         # Return None early for non-primary ranks
         if model.rank != 0:
             return None
 
-        for example, output in zip(examples, outputs):
-            example["model_output"] = output
-            example["model_answer"] = self.extract_answer(output)
+        for example, outputs in zip(examples, zip(*all_outputs)):
+            example["model_outputs"] = list(outputs)
+            example["model_answers"] = [self.extract_answer(o) for o in outputs]
 
         return {"examples": examples}
 
@@ -112,17 +115,16 @@ class AIME24Benchmark(BaseBenchmark):
             return None
 
         examples = results["examples"]
-        num_questions = len(examples) // self.n_repeat  # Get original number of questions
+        num_questions = len(examples)
 
         # Calculate accuracy for each repetition
-        repetition_results = []
+        all_results = []
         for i in range(self.n_repeat):
-            repetition_examples = examples[i * num_questions : (i + 1) * num_questions]
 
             solved = sum(
-                is_equiv(str(example["expected_answer"]), example["model_answer"]) for example in repetition_examples
+                [is_equiv(str(example["expected_answer"]), example["model_answers"][i]) for example in examples]
             )
-            repetition_results.append(
+            all_results.append(
                 {
                     "repetition": i + 1,
                     "num_total": num_questions,
@@ -132,15 +134,16 @@ class AIME24Benchmark(BaseBenchmark):
             )
 
         # Calculate overall statistics
-        solved = np.sum([result["num_solved"] for result in repetition_results])
-        accuracy_avg = np.mean([result["accuracy"] for result in repetition_results])
-        accuracy_std = np.std([result["accuracy"] for result in repetition_results])
-        accuracy_std_err = np.std([result["accuracy"] for result in repetition_results]) / np.sqrt(self.n_repeat)
+        solved_avg = np.mean([result["num_solved"] for result in all_results])
+        accuracy_avg = np.mean([result["accuracy"] for result in all_results])
+        accuracy_std = np.std([result["accuracy"] for result in all_results])
+        accuracy_std_err = np.std([result["accuracy"] for result in all_results]) / np.sqrt(self.n_repeat)
 
         results.update(
             {
-                "num_total": num_questions * self.n_repeat,
-                "solved": solved,
+                "num_total": num_questions,
+                "solved_avg": solved,
+                "run_stats": all_results,
                 "accuracy_avg": accuracy_avg,
                 "accuracy_std_err": accuracy_std_err,
             }

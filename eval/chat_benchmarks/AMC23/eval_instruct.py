@@ -1,6 +1,7 @@
 import json
 import logging
 from typing import Any, Dict, List, Optional
+import numpy as np
 
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
@@ -45,7 +46,7 @@ class AMC23Benchmark(BaseBenchmark):
         self.debug = debug
         self.seed = seed
         self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
-        self.n_repeat = 5
+        self.n_repeat = 2
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -60,8 +61,6 @@ class AMC23Benchmark(BaseBenchmark):
         """
         examples = self.load_questions()
 
-        examples = examples * self.n_repeat
-
         # Prepare instances for model
         all_instances = []
         if isinstance(model, lm_eval.models.huggingface.HFLM):
@@ -71,43 +70,46 @@ class AMC23Benchmark(BaseBenchmark):
         else:
             model_name = model.model_args["model"]
 
-        for idx, example in enumerate(examples):
-            current_seed = [s + idx for s in self.seed] if self.seed is not None else None
+        all_outputs = []
+        for i in range(self.n_repeat):
+            seed = [s + i for s in self.seed]
+            all_instances = []
+            for idx, example in enumerate(examples):
+                messages = [
+                    {"role": "user", "content": PROMPT.format(problem=example["question"])},
+                ]
 
-            messages = [
-                {"role": "user", "content": PROMPT.format(problem=example["question"])},
-            ]
+                templated_messages = model.apply_chat_template(messages)
 
-            templated_messages = model.apply_chat_template(messages)
-
-            all_instances.append(
-                Instance(
-                    "generate_until",
-                    example,
-                    (
-                        templated_messages,
-                        {
-                            "do_sample": False,
-                            "max_new_tokens": self.max_new_tokens,
-                            "temperature": 0.7,
-                            "seed": current_seed,
-                        },
-                    ),
-                    idx,
+                all_instances.append(
+                    Instance(
+                        "generate_until",
+                        example,
+                        (
+                            templated_messages,
+                            {
+                                "do_sample": False,
+                                "max_new_tokens": self.max_new_tokens,
+                                "temperature": 0.7,
+                                "seed": seed,
+                            },
+                        ),
+                        idx,
+                    )
                 )
-            )
 
-        # Generate model responses
-        self.logger.info("Generating responses for AMC23...")
-        outputs = self.compute(model, all_instances)
+            # Generate model responses
+            self.logger.info("Generating responses for AMC23...")
+            outputs = self.compute(model, all_instances)
+            all_outputs.append(outputs)
 
         # Return None early for non-primary ranks
         if model.rank != 0:
             return None
 
-        for example, output in zip(examples, outputs):
-            example["model_output"] = output
-            example["model_answer"] = self.extract_answer(output)
+        for example, outputs in zip(examples, zip(*all_outputs)):
+            example["model_outputs"] = list(outputs)
+            example["model_answers"] = [self.extract_answer(o) for o in outputs]
 
         return {"examples": examples}
 
@@ -119,15 +121,14 @@ class AMC23Benchmark(BaseBenchmark):
             return None
 
         examples = results["examples"]
-        num_questions = len(examples) // self.n_repeat  # Get original number of questions
+        num_questions = len(examples)
 
         # Calculate accuracy for each repetition
-        repetition_results = []
+        all_results = []
         for i in range(self.n_repeat):
-            repetition_examples = examples[i * num_questions : (i + 1) * num_questions]
 
-            solved = sum(is_equiv(str(example["answer"]), example["model_answer"]) for example in repetition_examples)
-            repetition_results.append(
+            solved = sum([is_equiv(str(example["answer"]), example["model_answers"][i]) for example in examples])
+            all_results.append(
                 {
                     "repetition": i + 1,
                     "num_total": num_questions,
@@ -137,20 +138,20 @@ class AMC23Benchmark(BaseBenchmark):
             )
 
         # Calculate overall statistics
-        solved = np.sum([result["num_solved"] for result in repetition_results])
-        accuracy_avg = np.mean([result["accuracy"] for result in repetition_results])
-        accuracy_std = np.std([result["accuracy"] for result in repetition_results])
-        accuracy_std_err = np.std([result["accuracy"] for result in repetition_results]) / np.sqrt(self.n_repeat)
+        solved_avg = np.mean([result["num_solved"] for result in all_results])
+        accuracy_avg = np.mean([result["accuracy"] for result in all_results])
+        accuracy_std = np.std([result["accuracy"] for result in all_results])
+        accuracy_std_err = np.std([result["accuracy"] for result in all_results]) / np.sqrt(self.n_repeat)
 
         results.update(
             {
-                "num_total": num_questions * self.n_repeat,
-                "solved": solved,
+                "num_total": num_questions,
+                "solved_avg": solved,
+                "run_stats": all_results,
                 "accuracy_avg": accuracy_avg,
                 "accuracy_std_err": accuracy_std_err,
             }
         )
-
         return results
 
     def load_questions(self) -> List[Dict[str, str]]:

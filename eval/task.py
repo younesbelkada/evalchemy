@@ -38,12 +38,12 @@ class BaseBenchmark(ABC):
                     model, lm_eval_models.openai_completions.OpenAICompletionsAPI
                 ):
                     instance.args[1]["max_tokens"] = max_new_tokens
-                    instance.args[1]["seed"] = seeds[0]
+                    instance.args[1]["seed"] = seeds[0] if "seed" in instance.args[1] else None
                     if "4o" in model.model:
                         instance.args[1]["max_tokens"] = min(max_new_tokens, 16384)
                 elif isinstance(model, lm_eval_models.vllm_causallms.VLLM):
                     instance.args[1]["max_gen_toks"] = max_new_tokens
-                    instance.args[1]["seed"] = seeds[0]
+                    instance.args[1]["seed"] = seeds[0] if "seed" in instance.args[1] else None
                 else:  # Huggingface
                     _ = instance.args[1].pop("seed") if "seed" in instance.args[1] else None
                     instance.args[1]["max_new_tokens"] = max_new_tokens

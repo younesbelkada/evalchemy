@@ -119,14 +119,35 @@ class AMC23Benchmark(BaseBenchmark):
             return None
 
         examples = results["examples"]
-        total = len(examples)
-        solved = sum(is_equiv(str(example["answer"]), example["model_answer"]) for example in examples)
+        num_questions = len(examples) // self.n_repeat  # Get original number of questions
+
+        # Calculate accuracy for each repetition
+        repetition_results = []
+        for i in range(self.n_repeat):
+            repetition_examples = examples[i * num_questions : (i + 1) * num_questions]
+
+            solved = sum(is_equiv(str(example["answer"]), example["model_answer"]) for example in repetition_examples)
+            repetition_results.append(
+                {
+                    "repetition": i + 1,
+                    "num_total": num_questions,
+                    "num_solved": solved,
+                    "accuracy": solved / num_questions,
+                }
+            )
+
+        # Calculate overall statistics
+        solved = np.sum([result["num_solved"] for result in repetition_results])
+        accuracy_avg = np.mean([result["accuracy"] for result in repetition_results])
+        accuracy_std = np.std([result["accuracy"] for result in repetition_results])
+        accuracy_std_err = np.std([result["accuracy"] for result in repetition_results]) / np.sqrt(self.n_repeat)
 
         results.update(
             {
-                "num_total": total,
-                "num_solved": solved,
-                "accuracy": solved / total,
+                "num_total": num_questions * self.n_repeat,
+                "solved": solved,
+                "accuracy_avg": accuracy_avg,
+                "accuracy_std_err": accuracy_std_err,
             }
         )
 

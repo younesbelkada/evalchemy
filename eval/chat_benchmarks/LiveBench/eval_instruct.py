@@ -47,7 +47,6 @@ class LiveBenchBenchmark(BaseBenchmark):
         debug: bool = False,
         num_choices: int = 1,
         release_date: str = "2024-08-31",
-        annotator_model: str = "gpt-4o-mini-2024-07-18",
         remove_existing_file: bool = True,
         seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
@@ -66,7 +65,6 @@ class LiveBenchBenchmark(BaseBenchmark):
         self.question_source = question_source
         self.do_sample = do_sample
         self.debug = debug
-        self.annotator_model = "none"
         self.release_date = release_date
         self.remove_existing_file = remove_existing_file
         self.num_workers = 1
@@ -419,9 +417,8 @@ class LiveBenchBenchmark(BaseBenchmark):
             metrics[subset_name] = sum(scores) / len(scores) * 100
 
         result_dict = {
-            self.annotator_model: {
+            "LiveBench_none": {
                 "metrics": metrics,
-            },
             "num_questions": len(all_results),
         }
         return result_dict

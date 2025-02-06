@@ -417,8 +417,7 @@ class LiveBenchBenchmark(BaseBenchmark):
             metrics[subset_name] = sum(scores) / len(scores) * 100
 
         result_dict = {
-            "LiveBench_none": {
-                "metrics": metrics,
+            "metrics": metrics,
             "num_questions": len(all_results),
         }
         return result_dict

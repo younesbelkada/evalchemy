@@ -49,6 +49,7 @@ class LiveBenchBenchmark(BaseBenchmark):
         release_date: str = "2024-08-31",
         annotator_model: str = "gpt-4o-mini-2024-07-18",
         remove_existing_file: bool = True,
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -78,7 +79,7 @@ class LiveBenchBenchmark(BaseBenchmark):
         self.temperature = temperature
         self.num_choices = num_choices
         self.all_release_dates = ["2024-07-26", "2024-06-24", "2024-08-31", "2024-11-25"]
-
+        self.seed = seed
         self.data_path = f"eval/chat_benchmarks/LiveBench/data"
 
     def get_question_list(self, model_name: str, release_set: set):
@@ -195,6 +196,7 @@ class LiveBenchBenchmark(BaseBenchmark):
                                         "max_new_tokens": self.max_tokens,
                                         "do_sample": self.temperature >= 1e-4,
                                         "temperature": self.temperature,
+                                        "seed": self.seed,
                                     },
                                 ),
                                 idx,

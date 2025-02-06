@@ -27,6 +27,7 @@ class MATH500Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/MATH500/data/math500.jsonl",
         debug: bool = False,
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -35,11 +36,13 @@ class MATH500Benchmark(BaseBenchmark):
         Args:
             data_file: File containing the MATH500 dataset (id, problem, reference_solution, expected_answer, source)
             debug: If set, only evaluate on 2 examples
+            seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
         """
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
+        self.seed = seed
         self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
@@ -80,6 +83,7 @@ class MATH500Benchmark(BaseBenchmark):
                             "do_sample": False,
                             "max_new_tokens": self.max_new_tokens,
                             "temperature": 0.7,
+                            "seed": self.seed,
                         },
                     ),
                     idx,

@@ -7,13 +7,15 @@ from lm_eval.api.model import LM
 from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string, remove_boxed
 
 from eval.task import BaseBenchmark
+import lm_eval.models
+from lm_eval.models.vllm_causallms import VLLM
 
 # Modified version of hendrycks_math with additional instruction to mark the solution with \\boxed
 # https://github.com/mlfoundations/evalchemy/blob/e70a45e41cb2ada273d6bb98e75dba303ec31f8b/eval/chat_benchmarks/AMC23/eval_instruct.py#L15
 PROMPT = """Problem: {problem}\nMark your solution with \\boxed\nAnswer:"""
 
 
-class AIME24Benchmark(BaseBenchmark):
+class MATH500Benchmark(BaseBenchmark):
     """
     MATH500 Benchmark for evaluating the math reasoning of LLMs.
     Link: https://huggingface.co/datasets/HuggingFaceH4/MATH-500
@@ -25,6 +27,7 @@ class AIME24Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/MATH500/data/math500.jsonl",
         debug: bool = False,
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -33,12 +36,14 @@ class AIME24Benchmark(BaseBenchmark):
         Args:
             data_file: File containing the MATH500 dataset (id, problem, reference_solution, expected_answer, source)
             debug: If set, only evaluate on 2 examples
+            seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
         """
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
-        self.max_new_tokens = 8192  # set higher to avoid truncation for reasoning models
+        self.seed = seed
+        self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -55,14 +60,32 @@ class AIME24Benchmark(BaseBenchmark):
 
         # Prepare instances for model
         all_instances = []
+        if isinstance(model, lm_eval.models.huggingface.HFLM):
+            model_name = model.pretrained
+        elif isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
+            model_name = str(f"openai/{model.model}")
+        else:
+            model_name = model.model_args["model"]
         for idx, example in enumerate(examples):
-            messages = [{"role": "user", "content": PROMPT.format(problem=example["problem"])}]
+            messages = [
+                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+            ]
+
             templated_messages = model.apply_chat_template(messages)
+
             all_instances.append(
                 Instance(
                     "generate_until",
                     example,
-                    (templated_messages, {"do_sample": False, "max_new_tokens": self.max_new_tokens}),
+                    (
+                        templated_messages,
+                        {
+                            "do_sample": False,
+                            "max_new_tokens": self.max_new_tokens,
+                            "temperature": 0.7,
+                            "seed": self.seed,
+                        },
+                    ),
                     idx,
                 )
             )

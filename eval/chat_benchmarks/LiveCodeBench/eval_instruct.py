@@ -51,6 +51,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
 
         Args:
             debug: If set, only evaluate on 2 examples
+            seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
         """
         super().__init__(logger)

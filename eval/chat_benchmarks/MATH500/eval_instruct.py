@@ -36,6 +36,7 @@ class MATH500Benchmark(BaseBenchmark):
         Args:
             data_file: File containing the MATH500 dataset (id, problem, reference_solution, expected_answer, source)
             debug: If set, only evaluate on 2 examples
+            seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
         """
         super().__init__(logger)

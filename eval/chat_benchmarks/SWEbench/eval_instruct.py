@@ -2,11 +2,17 @@ import json
 import logging
 import tempfile
 
+from swebench.harness.run_evaluation import main as run_evaluation
+from swebench.harness.constants import (
+    KEY_INSTANCE_ID,
+    KEY_MODEL,
+    KEY_PREDICTION,
+)
+
 from datasets import load_dataset
 from eval.task import BaseBenchmark
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
-from swebench.harness.run_evaluation import main as run_evaluation
 from typing import Any, Dict, Optional
 
 PREDS_PATH = "temp_swebench_preds.json"
@@ -17,6 +23,7 @@ class SWEBenchBenchmark(BaseBenchmark):
     SWE-bench (Software Engineering) benchmark for evaluating
     Language Models' ability to resolve GitHub Issues.
     """
+
     def __init__(
         self,
         dataset_name: str = "princeton-nlp/SWE-bench_Lite",
@@ -35,7 +42,7 @@ class SWEBenchBenchmark(BaseBenchmark):
         - princeton-nlp/SWE-bench_Verified
         """
         self.dataset = load_dataset(self.dataset_name, split="test")
-    
+
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
         NOTE: EvalAlchemy's version of SWE-bench evalutes models in a RAG
@@ -47,8 +54,9 @@ class SWEBenchBenchmark(BaseBenchmark):
         temp_dir = temp_dir_obj.name
 
         instances = [
-            x for x in load_dataset("princeton-nlp/SWE-bench_oracle", split="test")
-            if x['instance_id'] in self.dataset['instance_id']
+            x
+            for x in load_dataset("princeton-nlp/SWE-bench_oracle", split="test")
+            if x["instance_id"] in self.dataset["instance_id"]
         ]
 
         if self.debug:
@@ -69,7 +77,7 @@ class SWEBenchBenchmark(BaseBenchmark):
                             "temperature": 0.2,
                             "top_p": 0.95,
                             "do_sample": False,
-                        }
+                        },
                     ),
                     idx,
                 )
@@ -80,12 +88,12 @@ class SWEBenchBenchmark(BaseBenchmark):
         results = {}
         for idx, (instance, output) in enumerate(zip(instances, outputs)):
             results[instance["instance_id"]] = {
-                "instance_id": instance["instance_id"],
-                "model_name_or_path": model.model_identifier,
-                "model_patch": output["model_patch"],
+                KEY_INSTANCE_ID: instance["instance_id"],
+                KEY_MODEL: model.model_identifier,
+                KEY_PREDICTION: output,
             }
 
-        output_file = f"{self.dataset_name.split("/")[-1]}.json"
+        output_file = f"{self.dataset_name.split('/')[-1]}.json"
         output_path = f"{temp_dir}/{output_file}"
         with open(output_path, "w") as f:
             json.dump(results, f, indent=2)
@@ -112,7 +120,7 @@ class SWEBenchBenchmark(BaseBenchmark):
             rewrite_reports=False,
             modal=False,
             instance_image_tag="v1",
-            report_dir="."
+            report_dir=".",
         )
 
         temp_dir_obj.cleanup()
@@ -121,7 +129,6 @@ class SWEBenchBenchmark(BaseBenchmark):
             return None
 
         return json.load(open(report_path))
-
 
     def run_benchmark(self, model: LM) -> Dict[str, float]:
         self.logger.info("Starting SWE-bench evaluation")

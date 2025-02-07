@@ -23,6 +23,7 @@ import lm_eval.api.registry
 import lm_eval.api.task
 import lm_eval.models
 
+from eval.chat_benchmarks.curator_lm import CuratorAPIModel  # register curator model
 from eval.task import TaskManager as InstructTaskManager
 from eval.eval_tracker import DCEvaluationTracker
 
@@ -34,7 +35,7 @@ def setup_custom_parser():
     Create a custom argument parser that extends lm-eval-harness parser.
     """
     parser = setup_parser()
-    db_group = parser.add_mutually_exclusive_group()
+    db_group = parser.add_argument_group("database")
 
     db_group.add_argument("--model_id", type=str, default=None, help="Model UUID for direct database tracking")
 
@@ -294,7 +295,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
         if not os.getenv("OPENAI_API_KEY"):
             raise ValueError("Please set OPENAI_API_KEY")
 
-    task_manager = InstructTaskManager(annotator_model=args.annotator_model, debug=args.debug)
+    task_manager = InstructTaskManager(annotator_model=args.annotator_model, debug=args.debug, seed=args.seed)
     pretrain_task_manager = PretrainTaskManager(args.verbosity, include_path=args.include_path)
 
     utils.eval_logger.info(f"Selected Tasks: {[task for task in task_list]}")

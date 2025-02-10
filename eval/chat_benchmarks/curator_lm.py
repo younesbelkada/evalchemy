@@ -31,6 +31,18 @@ class CuratorAPIModel(TemplateLM):
 
         self.model_name = model or pretrained
 
+        self.model_args = kwargs
+        self.model_args.update(
+            {
+                "model": self.model_name,
+                "pretrained": pretrained,
+                "max_length": max_length,
+                "max_retries": max_retries,
+                "timeout": timeout,
+                "tokenized_requests": tokenized_requests,
+            }
+        )
+
         if "gemini" in self.model_name and "thinking" in self.model_name:
             max_requests_per_minute = max_requests_per_minute or 200
             max_tokens_per_minute = max_tokens_per_minute or 400_000

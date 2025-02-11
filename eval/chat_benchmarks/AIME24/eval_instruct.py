@@ -1,6 +1,7 @@
 import json
 import logging
 from typing import Any, Dict, List, Optional
+import numpy as np
 
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
@@ -28,6 +29,7 @@ class AIME24Benchmark(BaseBenchmark):
         self,
         data_file: str = "eval/chat_benchmarks/AIME24/data/aime24.json",
         debug: bool = False,
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -36,12 +38,15 @@ class AIME24Benchmark(BaseBenchmark):
         Args:
             data_file: File containing the AIME24 dataset (id, problem, reference_solution, expected_answer, source)
             debug: If set, only evaluate on 2 examples
+            seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
         """
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
         self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
+        self.seed = seed
+        self.n_repeat = 5
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -56,42 +61,47 @@ class AIME24Benchmark(BaseBenchmark):
         """
         examples = self.load_questions()
         # Prepare instances for model
-        all_instances = []
+        all_outputs = []
 
-        for idx, example in enumerate(examples):
-            messages = [
-                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
-            ]
+        for i in range(self.n_repeat):
+            all_instances = []
+            seed = [s + i for s in self.seed]
 
-            templated_messages = model.apply_chat_template(messages)
+            for idx, example in enumerate(examples):
+                messages = [
+                    {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+                ]
 
-            all_instances.append(
-                Instance(
-                    "generate_until",
-                    example,
-                    (
-                        templated_messages,
-                        {
-                            "do_sample": False,
-                            "max_new_tokens": self.max_new_tokens,
-                            "temperature": 0.7,
-                        },
-                    ),
-                    idx,
+                templated_messages = model.apply_chat_template(messages)
+
+                all_instances.append(
+                    Instance(
+                        "generate_until",
+                        example,
+                        (
+                            templated_messages,
+                            {
+                                "do_sample": False,
+                                "max_new_tokens": self.max_new_tokens,
+                                "temperature": 0.7,
+                                "seed": seed,
+                            },
+                        ),
+                        idx,
+                    )
                 )
-            )
 
-        # Generate model responses
-        self.logger.info("Generating responses for AIME24...")
-        outputs = self.compute(model, all_instances)
-
+            # Generate model responses
+            self.logger.info("Generating responses for AIME24...")
+            outputs = self.compute(model, all_instances)
+            all_outputs.append(outputs)
         # Return None early for non-primary ranks
         if model.rank != 0:
             return None
 
-        for example, output in zip(examples, outputs):
-            example["model_output"] = output
-            example["model_answer"] = self.extract_answer(output)
+        for example, outputs in zip(examples, zip(*all_outputs)):
+            example["model_outputs"] = list(outputs)
+            example["model_answers"] = [self.extract_answer(o) for o in outputs]
 
         return {"examples": examples}
 
@@ -103,14 +113,38 @@ class AIME24Benchmark(BaseBenchmark):
             return None
 
         examples = results["examples"]
-        total = len(examples)
-        solved = sum(is_equiv(str(example["expected_answer"]), example["model_answer"]) for example in examples)
+        num_questions = len(examples)
+
+        # Calculate accuracy for each repetition
+        all_results = []
+        for i in range(self.n_repeat):
+
+            solved = sum(
+                [is_equiv(str(example["expected_answer"]), example["model_answers"][i]) for example in examples]
+            )
+            all_results.append(
+                {
+                    "repetition": i + 1,
+                    "num_total": num_questions,
+                    "num_solved": solved,
+                    "accuracy": solved / num_questions,
+                }
+            )
+
+        # Calculate overall statistics
+        solved_avg = np.mean([result["num_solved"] for result in all_results])
+        accuracy_avg = np.mean([result["accuracy"] for result in all_results])
+        accuracy_std = np.std([result["accuracy"] for result in all_results])
+        accuracy_std_err = np.std([result["accuracy"] for result in all_results]) / np.sqrt(self.n_repeat)
 
         results.update(
             {
-                "num_total": total,
-                "num_solved": solved,
-                "accuracy": solved / total,
+                "num_total": num_questions,
+                "solved_avg": solved,
+                "run_stats": all_results,
+                "accuracy_avg": accuracy_avg,
+                "accuracy_std_err": accuracy_std_err,
+                "num_repeat": self.n_repeat,
             }
         )
 

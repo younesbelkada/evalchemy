@@ -7,6 +7,9 @@ import inspect
 import logging
 from itertools import islice
 
+import torch
+import random
+import numpy as np
 import torch.distributed as dist
 from lm_eval.api.model import LM
 from lm_eval.api.instance import Instance
@@ -19,8 +22,24 @@ class BaseBenchmark(ABC):
     def __init__(self, logger: Optional[logging.Logger] = None):
         self.logger = logger or logging.getLogger(self.__class__.__name__)
 
-    def _normalize_token_limits(self, model: LM, instances: List[Instance]) -> List[Instance]:
+    def _normalize_model_args(self, model: LM, instances: List[Instance]) -> List[Instance]:
         for instance in instances:
+            seeds = None
+            if "seed" in instance.args[1]:
+                seeds = instance.args[1]["seed"]
+
+                random.seed(seeds[0])
+                np.random.seed(seeds[1])
+                torch.manual_seed(seeds[2])
+
+                if isinstance(model, lm_eval_models.openai_completions.OpenAIChatCompletion) or isinstance(
+                    model, lm_eval_models.openai_completions.OpenAICompletionsAPI
+                ):
+                    instance.args[1]["seed"] = seeds[0] if "seed" in instance.args[1] else None
+                elif isinstance(model, lm_eval_models.vllm_causallms.VLLM):
+                    instance.args[1]["seed"] = seeds[0] if "seed" in instance.args[1] else None
+                else:  # Huggingface does not support seed
+                    _ = instance.args[1].pop("seed") if "seed" in instance.args[1] else None
             if "max_new_tokens" in instance.args[1]:
                 max_new_tokens = instance.args[1].pop("max_new_tokens")
                 if isinstance(model, lm_eval_models.openai_completions.OpenAIChatCompletion) or isinstance(
@@ -31,12 +50,12 @@ class BaseBenchmark(ABC):
                         instance.args[1]["max_tokens"] = min(max_new_tokens, 16384)
                 elif isinstance(model, lm_eval_models.vllm_causallms.VLLM):
                     instance.args[1]["max_gen_toks"] = max_new_tokens
-                else:
+                else:  # Huggingface does not support seed
                     instance.args[1]["max_new_tokens"] = max_new_tokens
         return instances
 
     def compute(self, model: LM, inputs: List[Instance], do_slice: bool = True) -> List[str]:
-        inputs = self._normalize_token_limits(model, inputs)
+        inputs = self._normalize_model_args(model, inputs)
 
         if model.world_size > 1 and do_slice:
             prompts = list(islice(inputs, model.rank, len(inputs), model.world_size))

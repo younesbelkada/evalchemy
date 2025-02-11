@@ -1,12 +1,14 @@
 import json
 import logging
 from typing import Any, Dict, List, Optional
+import numpy as np
 
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
 from lm_eval.tasks.hendrycks_math.utils import is_equiv, last_boxed_only_string, remove_boxed
 
 from eval.task import BaseBenchmark
+
 import lm_eval.models
 from lm_eval.models.vllm_causallms import VLLM
 
@@ -15,26 +17,26 @@ from lm_eval.models.vllm_causallms import VLLM
 PROMPT = """Problem: {problem}\nMark your solution with \\boxed\nAnswer:"""
 
 
-class MATH500Benchmark(BaseBenchmark):
+class AIME25Benchmark(BaseBenchmark):
     """
-    MATH500 Benchmark for evaluating the math reasoning of LLMs.
-    Link: https://huggingface.co/datasets/HuggingFaceH4/MATH-500
+    AIME25 Benchmark for evaluating the math reasoning of LLMs.
+    Link: https://huggingface.co/datasets/zwhe99/aime25
 
     Follows the evaluation logic of hendrycks_math answer extraction.
     """
 
     def __init__(
         self,
-        data_file: str = "eval/chat_benchmarks/MATH500/data/math500.jsonl",
+        data_file: str = "eval/chat_benchmarks/AIME25/data/aime25.json",
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
-        Initialize MATH500 benchmark.
+        Initialize AIME25 benchmark.
 
         Args:
-            data_file: File containing the MATH500 dataset (id, problem, reference_solution, expected_answer, source)
+            data_file: File containing the AIME25 dataset (id, problem, reference_solution, expected_answer, source)
             debug: If set, only evaluate on 2 examples
             seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
@@ -42,8 +44,9 @@ class MATH500Benchmark(BaseBenchmark):
         super().__init__(logger)
         self.data_file = data_file
         self.debug = debug
-        self.seed = seed
         self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
+        self.seed = seed
+        self.n_repeat = 5
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -57,50 +60,48 @@ class MATH500Benchmark(BaseBenchmark):
             or None for non-primary ranks
         """
         examples = self.load_questions()
-
         # Prepare instances for model
-        all_instances = []
-        if isinstance(model, lm_eval.models.huggingface.HFLM):
-            model_name = model.pretrained
-        elif isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
-            model_name = str(f"openai/{model.model}")
-        else:
-            model_name = model.model_args["model"]
-        for idx, example in enumerate(examples):
-            messages = [
-                {"role": "user", "content": PROMPT.format(problem=example["problem"])},
-            ]
+        all_outputs = []
 
-            templated_messages = model.apply_chat_template(messages)
+        for i in range(self.n_repeat):
+            all_instances = []
+            seed = [s + i for s in self.seed]
 
-            all_instances.append(
-                Instance(
-                    "generate_until",
-                    example,
-                    (
-                        templated_messages,
-                        {
-                            "do_sample": False,
-                            "max_new_tokens": self.max_new_tokens,
-                            "temperature": 0.7,
-                            "seed": self.seed,
-                        },
-                    ),
-                    idx,
+            for idx, example in enumerate(examples):
+                messages = [
+                    {"role": "user", "content": PROMPT.format(problem=example["problem"])},
+                ]
+
+                templated_messages = model.apply_chat_template(messages)
+
+                all_instances.append(
+                    Instance(
+                        "generate_until",
+                        example,
+                        (
+                            templated_messages,
+                            {
+                                "do_sample": False,
+                                "max_new_tokens": self.max_new_tokens,
+                                "temperature": 0.7,
+                                "seed": seed,
+                            },
+                        ),
+                        idx,
+                    )
                 )
-            )
 
-        # Generate model responses
-        self.logger.info("Generating responses for MATH500...")
-        outputs = self.compute(model, all_instances)
-
+            # Generate model responses
+            self.logger.info("Generating responses for AIME25...")
+            outputs = self.compute(model, all_instances)
+            all_outputs.append(outputs)
         # Return None early for non-primary ranks
         if model.rank != 0:
             return None
 
-        for example, output in zip(examples, outputs):
-            example["model_output"] = output
-            example["model_answer"] = self.extract_answer(output)
+        for example, outputs in zip(examples, zip(*all_outputs)):
+            example["model_outputs"] = list(outputs)
+            example["model_answers"] = [self.extract_answer(o) for o in outputs]
 
         return {"examples": examples}
 
@@ -112,21 +113,43 @@ class MATH500Benchmark(BaseBenchmark):
             return None
 
         examples = results["examples"]
-        total = len(examples)
-        solved = sum(is_equiv(str(example["answer"]), example["model_answer"]) for example in examples)
+        num_questions = len(examples)
+
+        # Calculate accuracy for each repetition
+        all_results = []
+        for i in range(self.n_repeat):
+
+            solved = sum([is_equiv(str(example["answer"]), example["model_answers"][i]) for example in examples])
+            all_results.append(
+                {
+                    "repetition": i + 1,
+                    "num_total": num_questions,
+                    "num_solved": solved,
+                    "accuracy": solved / num_questions,
+                }
+            )
+
+        # Calculate overall statistics
+        solved_avg = np.mean([result["num_solved"] for result in all_results])
+        accuracy_avg = np.mean([result["accuracy"] for result in all_results])
+        accuracy_std = np.std([result["accuracy"] for result in all_results])
+        accuracy_std_err = np.std([result["accuracy"] for result in all_results]) / np.sqrt(self.n_repeat)
 
         results.update(
             {
-                "num_total": total,
-                "num_solved": solved,
-                "accuracy": solved / total,
+                "num_total": num_questions,
+                "solved_avg": solved,
+                "run_stats": all_results,
+                "accuracy_avg": accuracy_avg,
+                "accuracy_std_err": accuracy_std_err,
+                "num_repeat": self.n_repeat,
             }
         )
 
         return results
 
     def load_questions(self) -> List[Dict[str, str]]:
-        """Load MATH500 questions from the data file."""
+        """Load AIME25 questions from the data file."""
         with open(self.data_file, "r") as f:
             questions = [json.loads(x) for x in f]
         self.logger.info(f"Loaded {len(questions)} questions from {self.data_file}")

@@ -2,17 +2,16 @@ import json
 import logging
 import random
 from typing import Any, Dict, List, Optional
-from datasets import load_dataset
 
+import lm_eval.models
+from datasets import load_dataset
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
+from lm_eval.models.vllm_causallms import VLLM
+
 from eval.task import BaseBenchmark
 
 from .testing_utils import get_multiple_choice_answer
-
-import lm_eval.models
-from lm_eval.models.vllm_causallms import VLLM
-
 
 PROMPT = """Return your final response within \\boxed{{}} and only include the letter choice (A, B, C, or D) as your final response.
 Problem: {problem}
@@ -29,6 +28,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
     def __init__(
         self,
         debug: bool = False,
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -36,11 +36,13 @@ class GPQADiamondBenchmark(BaseBenchmark):
 
         Args:
             debug: If set, only evaluate on 2 examples
+            seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
         """
         super().__init__(logger)
         self.dataset_name = "Idavidrein/gpqa"
         self.debug = debug
+        self.seed = seed
         self.max_new_tokens = 32768
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
@@ -73,28 +75,21 @@ class GPQADiamondBenchmark(BaseBenchmark):
                 {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
             ]
 
-            generation_args = {
-                "do_sample": False,
-                "temperature": 0.7,
-            }
-            # Add max tokens except for OpenAI models
-            if not isinstance(model, lm_eval.models.openai_completions.OpenAIChatCompletion):
-                generation_args["max_gen_toks" if isinstance(model, VLLM) else "max_new_tokens"] = self.max_new_tokens
-            else:
-                if "o1-mini" in model_name:  # o1-mini is a special case for OpenAI models
-                    generation_args["max_tokens"] = 32768
-                    generation_args["temperature"] = 1
-                else:
-                    generation_args["max_tokens"] = 4096
-                    generation_args["temperature"] = 0.2
-
             templated_messages = model.apply_chat_template(messages)
 
             all_instances.append(
                 Instance(
                     "generate_until",
                     example,
-                    (templated_messages, generation_args),
+                    (
+                        templated_messages,
+                        {
+                            "do_sample": False,
+                            "temperature": 0.7,
+                            "max_new_tokens": self.max_new_tokens,
+                            "seed": self.seed,
+                        },
+                    ),
                     idx,
                 )
             )

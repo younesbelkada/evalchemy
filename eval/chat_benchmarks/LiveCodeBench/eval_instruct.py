@@ -43,6 +43,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
     def __init__(
         self,
         debug: bool = False,
+        seed: List[int] = [0, 1234, 1234, 1234],
         logger: Optional[logging.Logger] = None,
     ):
         """
@@ -50,11 +51,13 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
 
         Args:
             debug: If set, only evaluate on 2 examples
+            seed: Random seed for reproducibility. Default is [0, 1234, 1234, 1234] for lm-eval-harness.
             logger: Optional logger instance
         """
         super().__init__(logger)
         self.debug = debug
         self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
+        self.seed = seed
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -98,6 +101,7 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
                             "do_sample": False,
                             "max_new_tokens": self.max_new_tokens,
                             "temperature": 0.7,
+                            "seed": self.seed,
                         },
                     ),
                     idx,

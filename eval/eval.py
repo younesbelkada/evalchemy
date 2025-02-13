@@ -156,8 +156,10 @@ def evaluate(
         generation_results = []
         valid_tasks = []  # Keep track of valid tasks
         for method, task, batch_size in zip(generate_methods, benchmark_tasks, benchmark_batch_sizes):
-            lm.batch_size_per_gpu = batch_size
-            lm.batch_size = batch_size      # For vLLM
+            if args.model == "hf":
+                lm.batch_size_per_gpu = batch_size
+            elif args.model == "vllm":
+                lm.batch_size = batch_size
             result = method(lm)
             if result is not None:  # Only keep valid results and their corresponding tasks
                 generation_results.append(result)

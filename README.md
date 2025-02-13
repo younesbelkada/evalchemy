@@ -1,10 +1,10 @@
 # 🧪 Evalchemy
 
-> *A framework for gold standard language model evaluations*
+> A unified and easy-to-use toolkit for evaluating post-trained language models
 
 ![alt text](https://github.com/mlfoundations/evalchemy/blob/main/image.png)
 
-Evalchemy is a unified and easy-to-use toolkit for evaluating post-trained language models. Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bespoke Labs](https://bespokelabs.ai)  and builds on the [LM-Eval-Harness](https://github.com/EleutherAI/lm-evaluation-harness).
+Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bespoke Labs](https://bespokelabs.ai)  and builds on the [LM-Eval-Harness](https://github.com/EleutherAI/lm-evaluation-harness).
 
 
 ## 🎉 What's New 

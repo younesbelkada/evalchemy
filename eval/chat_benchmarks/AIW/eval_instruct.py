@@ -87,7 +87,7 @@ class AIWBenchmark(BaseBenchmark):
                     idx,
                 )
             )
-        
+
         # Generate model responses
         self.logger.info("Generating responses for AIW...")
         outputs = self.compute(model, all_instances)
@@ -122,7 +122,6 @@ class AIWBenchmark(BaseBenchmark):
 
         return results
 
-
     def load_questions(self) -> List[Dict[str, str]]:
         """Load AIW questions from the data file."""
         with open(self.data_file, "r") as f:
@@ -142,11 +141,11 @@ class AIWBenchmark(BaseBenchmark):
             str: Extracted final answer. Returns empty string if no answer found in \boxed.
         """
         try:
-            model_response = output.replace('\n', ' ')
-            return re.findall(r'answer:.*?(\d+)', model_response.lower())[0]
+            model_response = output.replace("\n", " ")
+            return re.findall(r"answer:.*?(\d+)", model_response.lower())[0]
         except:
             try:
-                return re.findall(r'has.*?(\d+)', model_response.lower())[0]
+                return re.findall(r"has.*?(\d+)", model_response.lower())[0]
             except:
-                print(f'Error parsing model response for model')
+                print(f"Error parsing model response for model")
                 return ""

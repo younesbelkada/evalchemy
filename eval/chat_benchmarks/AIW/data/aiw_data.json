@@ -649,28 +649,43 @@
     },
     {
         "id": 109,
-        "prompt": "Reformulate the following problem as a relational database SQL programming problem. Problem: \"Alice has four sisters and a brother. How many sisters in total does Alice's brother have? DO NOT OUTPUT ANY TEXT EXCEPT following format that contains final answer: \"### Answer: \".",
+        "prompt": "Reformulate the following problem as a relational database SQL programming problem. Problem: \"Alice has four sisters and a brother. How many sisters in total does Alice's brother have?\"",
         "right_answer": "null",
         "description": "AIW SQL experimental Reformulation prompt."
     },
     {
         "id": 110,
-        "prompt": "Alice has 3 brothers and she also has 6 sisters. How many sisters does Alice's brother have? Solve this problem and provide the final answer in following form: \"### Answer: \"",
+        "prompt": [
+            "Alice has 3 brothers and she also has 6 sisters. How many sisters does Alice's brother have? Solve this problem and provide the final answer in following form: \"### Answer: \"",
+            "Review your previous answer and find problems with your answer.",
+            "Based on the problems you found, improve your answer. Please reiterate your answer, with your final answer a single numerical number, in the following form: \"### Answer: \""
+        ],
         "right_answer": "7"
     },
     {
         "id": 111,
-        "prompt": "Alice has 4 brothers and she also has 1 sister. How many sisters does Alice's brother have? Solve this problem and provide the final answer in following form: \"### Answer: \"",
+        "prompt": [
+            "Alice has 4 brothers and she also has 1 sister. How many sisters does Alice's brother have? Solve this problem and provide the final answer in following form: \"### Answer: \"",
+            "Please double check the solution, find mistakes if any and correct those, providing revised correct solution.",
+            "The provided solution still contains mistakes. Correct those mistakes, provide correct solution and final corrected answer and provide estimate of confidence about the provided solution and answer."
+        ],
         "right_answer": "2"
     },
     {
         "id": 112,
-        "prompt": "Alice has 3 brothers and she also has 6 sisters. How many sisters does Alice's brother have? Solve this problem and provide the final answer in following form: \"### Answer: \"",
+        "prompt": [
+            "Alice has 3 brothers and she also has 6 sisters. How many sisters does Alice's brother have? Solve this problem and provide the final answer in following form: \"### Answer: \"",
+            "Please double check the solution, find mistakes if any and correct those, providing revised correct solution.",
+            "The provided solution still contains mistakes. Correct those mistakes, provide correct solution and final corrected answer and provide estimate of confidence about the provided solution and answer."
+        ],
         "right_answer": "7"
     },
     {
         "id": 113,
-        "prompt": "Alice has X brothers and she also has Y sisters. How many sisters does Alice's brother have? Think step by step. Now, solve it for X=3 and Y=6. Provide the final answer in following form: \"### Answer: \"",
+        "prompt": [
+            "Alice has X brothers and she also has Y sisters. How many sisters does Alice's brother have? Think step by step.",
+            "Now, solve it for X=3 and Y=6. Provide the final answer in following form: \"### Answer: \""
+        ],
         "right_answer": "7"
     },
     {

@@ -131,7 +131,6 @@ class AIWBenchmark(BaseBenchmark):
         if results is None:
             return None
 
-        breakpoint()
         examples = results["examples"]
 
         # Filter only the target IDs

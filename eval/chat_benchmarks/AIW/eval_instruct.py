@@ -115,14 +115,15 @@ class AIWBenchmark(BaseBenchmark):
     def extract_answer(self, output: str) -> str:
         """Extract the final answer from a model-generated solution."""
         try:
-            model_response = output.replace("\n", " ")
-            return re.findall(r"answer:.*?(\d+)", model_response.lower())[0]
+            return re.findall(r"answer:.*?(\d+)", model_response.lower())[-1]
         except:
             try:
-                return re.findall(r"has.*?(\d+)", model_response.lower())[0]
+                return re.findall(r"answer is.*?(\d+)", model_response.lower())[-1]
             except:
-                print(f"Error parsing model response")
-                return ""
+                try:
+                    return re.findall(r"boxed{(\d+)}", model_response.lower())[-1]
+                except:
+                    return None
 
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
         """Evaluate the generated solution completions over multiple trials."""

@@ -115,13 +115,13 @@ class AIWBenchmark(BaseBenchmark):
     def extract_answer(self, output: str) -> str:
         """Extract the final answer from a model-generated solution."""
         try:
-            return re.findall(r"answer:.*?(\d+)", model_response.lower())[-1]
+            return re.findall(r"answer:.*?(\d+)", output.lower())[-1]
         except:
             try:
-                return re.findall(r"answer is.*?(\d+)", model_response.lower())[-1]
+                return re.findall(r"answer is.*?(\d+)", output.lower())[-1]
             except:
                 try:
-                    return re.findall(r"boxed{(\d+)}", model_response.lower())[-1]
+                    return re.findall(r"boxed{(\d+)}", output.lower())[-1]
                 except:
                     return None
 

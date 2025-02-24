@@ -73,8 +73,8 @@ dependencies = [
     "mistralai",
     "reka-api",
     "together",
-    "fschat",
     "dashscope",
+    "fschat @ file:eval/chat_benchmarks/MTBench",  # Changed to match the likely package name
     
     # Cloud & Storage
     "gcsfs",
@@ -152,6 +152,9 @@ dependencies = [
 
     # SWE-bench
     "swebench>=3.0.4",
+
+    # LM Eval
+    "lm-eval[vllm]@git+https://github.com/EtashGuha/lm-evaluation-harness@etashg/tokenize_fix",
 ]
 
 [project.urls]
@@ -166,12 +169,6 @@ dev = [
     "flake8",
     "pre-commit",
     "isort",
-    "lm-eval"
-]
-eval = [
-    # Using exact package names from their setup files
-    "fschat @ file:eval/chat_benchmarks/MTBench",  # Changed to match the likely package name
-    "lm-eval[vllm]@git+https://github.com/EtashGuha/lm-evaluation-harness@etashg/tokenize_fix",
 ]
 
 [tool.hatch.build.targets.wheel]

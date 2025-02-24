@@ -77,7 +77,10 @@ class GPQADiamondBenchmark(BaseBenchmark):
                 example["answer"] = correct_answer
 
                 messages = [
-                    {"role": "user", "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string)},
+                    {
+                        "role": "user",
+                        "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string),
+                    },
                 ]
 
                 templated_messages = model.apply_chat_template(messages)
@@ -113,7 +116,6 @@ class GPQADiamondBenchmark(BaseBenchmark):
             example["model_answers"] = [get_multiple_choice_answer(o) for o in outputs]
 
         return {"examples": examples}
-
 
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
         """Evaluate the generated solution completions."""
@@ -156,7 +158,6 @@ class GPQADiamondBenchmark(BaseBenchmark):
         )
 
         return results
-
 
     def load_questions(self) -> List[Dict[str, Any]]:
         """Load GPQADiamond questions from the dataset."""

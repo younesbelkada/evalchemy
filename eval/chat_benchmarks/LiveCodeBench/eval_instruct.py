@@ -33,11 +33,13 @@ def has_code(response):
     matches = re.findall(pattern, response, re.DOTALL)
     return matches
 
-# Calculate mean and standard error for all metrics        
+
+# Calculate mean and standard error for all metrics
 def calc_stats(values):
     mean = np.mean(values)
     stderr = np.std(values, ddof=1) / np.sqrt(len(values))
     return mean, stderr
+
 
 class LiveCodeBenchBenchmark(BaseBenchmark):
     """
@@ -216,17 +218,19 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
 
         # First, organize completions by repeat index
         examples_by_repeat = defaultdict(list)
-        for example in responses['examples']:
-            for i, (output, answers) in enumerate(zip(example['model_outputs'], example['model_answers'])):
-                examples_by_repeat[i].append({
-                    'model_answer': answers,
-                    'difficulty': example['difficulty'],
-                    # Copy other necessary fields from example
-                })
+        for example in responses["examples"]:
+            for i, (output, answers) in enumerate(zip(example["model_outputs"], example["model_answers"])):
+                examples_by_repeat[i].append(
+                    {
+                        "model_answer": answers,
+                        "difficulty": example["difficulty"],
+                        # Copy other necessary fields from example
+                    }
+                )
 
         # Evaluate each set of completions separately
         all_metrics = []
-        
+
         for repeat_idx, examples in examples_by_repeat.items():
             # Use ThreadPoolExecutor with limited concurrency
             results = []
@@ -247,65 +251,67 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
                         self.logger.error(f"Future error for example {idx}: {str(e)}")
                         results[idx] = (
                             {
-                                'content': example['model_answer'],
-                                'difficulty': example['difficulty'],
-                                'correctness': False,
-                                'reason': f"Future error: {str(e)}"
+                                "content": example["model_answer"],
+                                "difficulty": example["difficulty"],
+                                "correctness": False,
+                                "reason": f"Future error: {str(e)}",
                             },
-                            example
+                            example,
                         )
 
             # Calculate metrics for this repeat
-            total_correct = sum(1 for result, _ in results if result['correctness'])
+            total_correct = sum(1 for result, _ in results if result["correctness"])
             total_finish = len(results)
 
             per_difficulty_correct = defaultdict(int)
             per_difficulty_total = defaultdict(int)
 
             for result, example in results:
-                per_difficulty_correct[example['difficulty']] += result['correctness']
-                per_difficulty_total[example['difficulty']] += 1
+                per_difficulty_correct[example["difficulty"]] += result["correctness"]
+                per_difficulty_total[example["difficulty"]] += 1
 
             metrics = {
-                'total_correct': total_correct,
-                'total_finish': total_finish,
-                'accuracy': total_correct / total_finish,
-                'per_difficulty_correct': dict(per_difficulty_correct),
-                'per_difficulty_total': dict(per_difficulty_total),
+                "total_correct": total_correct,
+                "total_finish": total_finish,
+                "accuracy": total_correct / total_finish,
+                "per_difficulty_correct": dict(per_difficulty_correct),
+                "per_difficulty_total": dict(per_difficulty_total),
             }
-            
+
             # Add per-difficulty accuracies
             for difficulty in per_difficulty_correct.keys():
-                metrics[f'accuracy_{difficulty}'] = per_difficulty_correct[difficulty] / per_difficulty_total[difficulty]
-                
+                metrics[f"accuracy_{difficulty}"] = (
+                    per_difficulty_correct[difficulty] / per_difficulty_total[difficulty]
+                )
+
             all_metrics.append(metrics)
 
         final_metrics = {}
-        
+
         # Calculate stats for overall accuracy
-        acc_values = [m['accuracy'] for m in all_metrics]
+        acc_values = [m["accuracy"] for m in all_metrics]
         mean_acc, stderr_acc = calc_stats(acc_values)
-        final_metrics['accuracy_mean'] = mean_acc
-        final_metrics['accuracy_stderr'] = stderr_acc
-        
+        final_metrics["accuracy_mean"] = mean_acc
+        final_metrics["accuracy_stderr"] = stderr_acc
+
         # Calculate stats for each difficulty level
-        difficulties = all_metrics[0]['per_difficulty_correct'].keys()
+        difficulties = all_metrics[0]["per_difficulty_correct"].keys()
         for diff in difficulties:
-            acc_values = [m[f'accuracy_{diff}'] for m in all_metrics]
+            acc_values = [m[f"accuracy_{diff}"] for m in all_metrics]
             mean_acc, stderr_acc = calc_stats(acc_values)
-            final_metrics[f'accuracy_{diff}_mean'] = mean_acc
-            final_metrics[f'accuracy_{diff}_stderr'] = stderr_acc
+            final_metrics[f"accuracy_{diff}_mean"] = mean_acc
+            final_metrics[f"accuracy_{diff}_stderr"] = stderr_acc
 
         # Log results
         self.logger.info(f"Overall accuracy: {mean_acc:.2%} ± {stderr_acc:.2%}")
         for diff in difficulties:
-            mean = final_metrics[f'accuracy_{diff}_mean']
-            stderr = final_metrics[f'accuracy_{diff}_stderr']
+            mean = final_metrics[f"accuracy_{diff}_mean"]
+            stderr = final_metrics[f"accuracy_{diff}_stderr"]
             self.logger.info(f"Accuracy {diff}: {mean:.2%} ± {stderr:.2%}")
 
         # Include raw results and examples in final metrics
-        final_metrics['raw_metrics'] = all_metrics
-        final_metrics['examples'] = [result for result, _ in results]  # Include last run's examples
+        final_metrics["raw_metrics"] = all_metrics
+        final_metrics["examples"] = [result for result, _ in results]  # Include last run's examples
 
         return final_metrics
 

@@ -38,7 +38,6 @@ class LiveBenchBenchmark(BaseBenchmark):
 
     def __init__(
         self,
-        dtype: str = "float32",
         max_new_token: int = 4096,
         dataset_name: str = "live_bench",
         question_source: str = "huggingface",
@@ -55,12 +54,10 @@ class LiveBenchBenchmark(BaseBenchmark):
         Initialize LiveBench benchmark.
 
         Args:
-            dtype: Data type for model inference
             dataset_name: Name of the dataset
             logger: Optional logger instance
         """
         super().__init__(logger)
-        self.dtype = dtype
         self.dataset_name = dataset_name
         self.question_source = question_source
         self.do_sample = do_sample

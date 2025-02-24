@@ -146,15 +146,33 @@ def play_a_match_gt(match: MatchSingle, output_file: str, debug=False):
             category = "language"
         elif task_or_subtask in coding_test_case_tasks:
             # use entire question object, because there are test cases inside.
-            score = LCB_generation_process_results(question, llm_answer, debug)
+            try:
+                score = LCB_generation_process_results(question, llm_answer, debug)
+            except Exception as e:
+                if debug:
+                    print(f"Warning: Error evaluating coding question {question['question_id']}: {str(e)}")
+                # Return score of 0 for failed evaluation but continue processing other questions
+                score = 0
             category = "coding"
         else:
             raise NotImplementedError(f"This task ({task_or_subtask}) has not been implemented yet.")
-    except:
-        raise RuntimeError(f"Error occurred evaluating question {question['question_id']}")
+    except Exception as e:
+        # Log the error but continue with other questions
+        print(f"Error evaluating question {question['question_id']}: {str(e)}")
+        score = 0
+        # Try to determine category even if evaluation failed
+        if task_or_subtask in coding_test_case_tasks:
+            category = "coding"
+        elif any(x in task_or_subtask for x in ["amc", "smc", "aime", "imo", "usamo", "amps_hard"]):
+            category = "math"
+        elif task_or_subtask in ["web_of_lies_v2", "house_traversal", "zebra_puzzle", "spatial"]:
+            category = "reasoning"
+        else:
+            category = "unknown"
 
     if not category:
-        raise NotImplementedError(f"A category must be assigned to each task")
+        category = "unknown"  # Fallback category instead of raising error
+
     question_id = question["question_id"]
     turn = 1
     result = {
@@ -189,23 +207,17 @@ def gen_judgments(
     debug=False,
 ):
     """
-    Evaluate answers to questions for all the given models, compared to the expected ground truth answer for each question.
-
-    Args:
-        questions: The list of questions to which answers will be evaluated
-        output_file: The path to the file where judgments will be written
-        answer_dir: The directory containing a file for each model's answers (e.g. {answer_dir}/gpt-4o-mini.jsonl contains answers from gpt-4o-mini)
-        model_list: The list of model names whose answers will be evaluated
-        remove_existing_file: Whether to remove an existing judgment output file or append
-        bench_name: The subset of LiveBench for which answers should be evaluated (e.g. 'live_bench' or 'live_bench/coding')
-        parallel: The number of concurrent threads to use for evaluating answers
+    Evaluate answers to questions for all the given models.
     """
+    # Convert to absolute paths
+    output_file = os.path.abspath(output_file)
+    answer_dir = os.path.abspath(answer_dir)
+
     # Load answers
     model_answers = load_model_answers(answer_dir)
     print("models:", model_answers.keys())
 
     if model_list is None:
-        # evaluate answers for all models who have answers in answer_dir
         models = get_model_list(answer_dir)
     else:
         models = model_list
@@ -214,7 +226,11 @@ def gen_judgments(
 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     if output_file and os.path.exists(output_file) and remove_existing_file:
-        os.remove(output_file)
+        try:
+            os.remove(output_file)
+        except FileNotFoundError:
+            # File doesn't exist, which is fine since we want to remove it anyway
+            pass
 
     make_match_func = make_match_single
     check_data(questions, model_answers, models)

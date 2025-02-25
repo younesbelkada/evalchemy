@@ -9,6 +9,10 @@ Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bes
 
 ## 🎉 What's New 
 
+#### [2025.02.24] New Reasoning Benchmarks
+
+- AIME25 and Alice in Wonderland have been added to [available benchmarks](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#built-in-benchmarks).
+
 #### [2025.01.30] API Model Support
 
 - [API models via Curator](https://github.com/bespokelabsai/curator/): With `--model curator` you can now evaluate with even more API based models via [Curator](https://github.com/bespokelabsai/curator/), including all those supported by [LiteLLM](https://docs.litellm.ai/docs/providers) 
@@ -22,11 +26,6 @@ Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bes
         --model_args 'tokenized_requests=False' \
         --output_path logs
 ```
-
-#### [2025.01.29] New Reasoning Benchmarks
-
-- AIME25 and Alice in Wonderland have been added to [available benchmarks](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#built-in-benchmarks).
-
 #### [2025.01.29] New Reasoning Benchmarks
 
 - AIME24, AMC23, MATH500, LiveCodeBench, GPQA-Diamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval have been added to our growing list of [available benchmarks](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#built-in-benchmarks). This is part of the effort in the [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project. See the [our blog post](https://www.open-thoughts.ai/blog/measure) on using Evalchemy for measuring reasoning models. 

@@ -220,13 +220,14 @@ class LiveCodeBenchBenchmark(BaseBenchmark):
         examples_by_repeat = defaultdict(list)
         for example in responses["examples"]:
             for i, (output, answers) in enumerate(zip(example["model_outputs"], example["model_answers"])):
-                examples_by_repeat[i].append(
-                    {
-                        "model_answer": answers,
-                        "difficulty": example["difficulty"],
-                        # Copy other necessary fields from example
-                    }
-                )
+                # Create a copy of the original example and update with the specific completion
+                example_copy = example.copy()  # Make a shallow copy of the example
+                example_copy["model_answer"] = answers
+                example_copy["model_output"] = output
+                # Remove the lists of all outputs/answers to avoid confusion
+                example_copy.pop("model_outputs", None)
+                example_copy.pop("model_answers", None)
+                examples_by_repeat[i].append(example_copy)
 
         # Evaluate each set of completions separately
         all_metrics = []

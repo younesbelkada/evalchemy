@@ -90,3 +90,5 @@
 |             |         | Qwen/Qwen2.5-Coder-3B-Instruct          | Input-CoT (pass@1)            | 53.4        | 53.2            |                                    |
 |             |         |                                         | Output-CoT (pass@1)           | 53.3        | 56.0            |  
 | Alice In Wonderland       | Negin    | gpt-4o-2024-05-13              | accuracy                | 16.7        | 16.6           | [Paper](https://arxiv.org/abs/2406.02061) |
+| MedQA       | Asad    | gpt-4o-mini-2024-07-18                  | accuracy                      | 74.4%       | 72.4%           | [Vals.ai Leaderboard](https://www.vals.ai/benchmarks/medqa-02-03-2025) |
+|             |         | meta-llama/Llama-3.1-8B-Instruct        | accuracy                      | 63.6%       | 62.6%           | [Vals.ai Leaderboard](https://www.vals.ai/benchmarks/medqa-02-03-2025) |

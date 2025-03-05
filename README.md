@@ -20,7 +20,7 @@ Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bes
 ```
   python -m eval.eval \
         --model curator  \
-        --tasks AIME24,MATH500,GPQA-Diamond \
+        --tasks AIME24,MATH500,GPQADiamond \
         --model_name "gemini/gemini-2.0-flash-thinking-exp-01-21" \
         --apply_chat_template False \
         --model_args 'tokenized_requests=False' \
@@ -28,7 +28,7 @@ Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bes
 ```
 #### [2025.01.29] New Reasoning Benchmarks
 
-- AIME24, AMC23, MATH500, LiveCodeBench, GPQA-Diamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval have been added to our growing list of [available benchmarks](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#built-in-benchmarks). This is part of the effort in the [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project. See the [our blog post](https://www.open-thoughts.ai/blog/measure) on using Evalchemy for measuring reasoning models. 
+- AIME24, AMC23, MATH500, LiveCodeBench, GPQADiamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval have been added to our growing list of [available benchmarks](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#built-in-benchmarks). This is part of the effort in the [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project. See the [our blog post](https://www.open-thoughts.ai/blog/measure) on using Evalchemy for measuring reasoning models. 
 
 #### [2025.01.28] New Model Support
 - [vLLM models](https://blog.vllm.ai/2023/06/20/vllm.html): High-performance inference and serving engine with PagedAttention technology

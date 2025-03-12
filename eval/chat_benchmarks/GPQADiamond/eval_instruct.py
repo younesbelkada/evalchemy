@@ -149,7 +149,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         results.update(
             {
                 "num_total": num_questions,
-                "solved_avg": solved,
+                "solved_avg": solved_avg,
                 "run_stats": all_results,
                 "accuracy_avg": accuracy_avg,
                 "accuracy_std_err": accuracy_std_err,

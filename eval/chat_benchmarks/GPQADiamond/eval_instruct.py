@@ -17,7 +17,6 @@ Problem: {problem}
 Options: {options}
 Answer:"""
 
-
 class GPQADiamondBenchmark(BaseBenchmark):
     """
     GPQADiamond Benchmark for evaluating multiple choice reasoning of LLMs.
@@ -56,6 +55,10 @@ class GPQADiamondBenchmark(BaseBenchmark):
             Dictionary containing generated responses and examples
         """
         examples = self.load_questions()
+        for example in examples:
+            multiple_choice_string, correct_answer = self.generate_multiple_choice_answers(example)
+            example["multiple_choice_string"] = multiple_choice_string
+            example["answer"] = correct_answer
 
         if isinstance(model, lm_eval.models.huggingface.HFLM):
             model_name = model.pretrained
@@ -71,13 +74,10 @@ class GPQADiamondBenchmark(BaseBenchmark):
             seed = [s + i for s in self.seed]
 
             for idx, example in enumerate(examples):
-                multiple_choice_string, correct_answer = self.generate_multiple_choice_answers(example)
-                example["answer"] = correct_answer
-
                 messages = [
                     {
                         "role": "user",
-                        "content": PROMPT.format(problem=example["Question"], options=multiple_choice_string),
+                        "content": PROMPT.format(problem=example["Question"], options=example["multiple_choice_string"]),
                     },
                 ]
 
